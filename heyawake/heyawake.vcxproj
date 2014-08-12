@@ -82,6 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\cyghome\vcproj\heyawake\src\targetver.h" />
+    <ClInclude Include="..\src\core\heyawake.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\cyghome\vcproj\heyawake\src\main.cpp" />

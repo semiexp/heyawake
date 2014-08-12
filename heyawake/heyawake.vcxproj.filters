@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="ソース ファイル\core">
+      <UniqueIdentifier>{1a727d03-03d6-4c51-a28d-483937226df2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -20,6 +23,9 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\cyghome\vcproj\heyawake\src\targetver.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\heyawake.h">
+      <Filter>ソース ファイル\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
