@@ -1,0 +1,16 @@
+Debug/
+ipch/
+perf_report/
+x64/
+Release/
+ToOther/
+TestResults/
+heyawake/Debug
+heyawake/Release
+heyawake/ToOther
+heyawake/x64
+heyawake/ReadMe.txt
+heyawake.sdf
+heyawake.sln
+heyawake.v12.suo
+heyawake.opensdf
