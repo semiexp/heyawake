@@ -1,81 +1,99 @@
 
 #include <vector>
 
-class hy_field;
+class HYField;
 
-class hy_problem
+class HYProblem
 {
-	int H, W;
-	std::vector<int> rY, rX, rH, rW, rHint;
+	int height, width;
+	std::vector<int> top_y, top_x, end_y, end_x, hint;
 
-	friend class hy_field;
+	friend class HYField;
 
 public:
-	hy_problem() : H(0), W(0) { }
-	hy_problem(int H, int W) : H(H), W(W) {}
+	HYProblem() : height(0), width(0) { }
+	HYProblem(int h, int w) : height(h), width(w) {}
 
-	void add_hint(int y, int x, int h, int w, int hint) {
-		rY.push_back(y);
-		rX.push_back(x);
-		rH.push_back(h);
-		rW.push_back(w);
-		rHint.push_back(hint);
+	void AddHint(int y, int x, int h, int w, int ht) {
+		top_y.push_back(y);
+		top_x.push_back(x);
+		end_y.push_back(y + h);
+		end_x.push_back(x + w);
+		hint.push_back(ht);
 	}
 };
 
-class hy_field
+class HYField
 {
-	struct cell;
-	struct restricted_set;
-	struct room;
+	struct Cell;
+	struct RestrictedSet;
+	struct Room;
 
-	struct cell
+	typedef char Status;
+	typedef char CellCord;
+	typedef short CellId;
+	typedef short RSetId;
+	typedef short RoomId;
+
+	struct Cell
 	{
-		int status;
+		Status stat;
 
-		int roomId;
-		int cond; // !!! vector !!!
+		RoomId room_id;
+		RSetId n_conds, *cond; // !!! vector !!!
 	};
 
-	struct restricted_set
+	struct RestrictedSet
 	{
-		int status;
-		int xCells; // xor of ids of currently involving cells
+		Status stat;
+		CellCord rem_cells;
+		CellId xor_id; // xor of ids of currently involving cells
 	};
 
-	struct room
+	struct Room
 	{
-		int y, x, height, width, hint;
+		CellCord top_y, top_x, end_y, end_x;
+		CellId hint;
 
-		room() : y(-1), x(-1), height(0), width(0), hint(-1) {}
-		room(int y, int x, int height, int width, int hint) : y(y), x(x), height(height), width(width), hint(hint) {}
+		Room() : top_y(-1), top_x(-1), end_y(-1), end_x(-1), hint(-1) {}
+		Room(CellCord ty, CellCord tx, CellCord ey, CellCord ex, CellId hint) : top_y(ty), top_x(tx), end_y(ey), end_x(ex), hint(hint) {}
 	};
 
-	int H, W, nRSets, nRooms;
-	cell *field;
-	restricted_set *rsets;
-	room *rooms;
+	CellCord height, width;
+	RSetId n_rsets;
+	RoomId n_rooms;
+	Status status;
+	Cell *field;
+	RestrictedSet *rsets;
+	Room *rooms;
+	char *pool;
+	int sz_pool;
+
+	CellId Id(CellCord y, CellCord x) { return y * width + x; }
+	bool Range(CellCord y, CellCord x) { return 0 <= y && y < height && 0 <= x && x < width; }
+
+	Status Exclude(CellId cid);
+	Status ExcludeFromRSet(RSetId sid, CellId cid);
+	Status SolveRestrictedSet(RSetId sid);
+	Status SolveRoom(RoomId rid); // (* TODO : necessary? *)
 
 public:
-	static const int UNDECIDED = 0;
-	static const int WHITE = 1;
-	static const int BLACK = 2;
+	static const Status UNDECIDED = 0;
+	static const Status WHITE = 1;
+	static const Status BLACK = 2;
 
-	static const int NORMAL = 0;
-	static const int SOLVED = 1;
-	static const int INCONSISTENT = 2;
+	static const Status NORMAL = 0;
+	static const Status SOLVED = 1;
+	static const Status INCONSISTENT = 2;
 
-	hy_field();
-	hy_field(hy_problem &prob);
-	hy_field(const hy_field &field);
+	HYField();
+	HYField(HYProblem &prob);
+	HYField(const HYField &src);
 
-	void load(hy_problem &prob);
+	void Load(HYProblem &prob);
 
-	int determine_white(int y, int x);
-	int determine_black(int y, int x);
-
-	int solve_restricted_set(int sid);
-	int solve_room(int rid); // (* TODO : necessary? *)
+	Status DetermineWhite(CellCord y, CellCord x);
+	Status DetermineBlack(CellCord y, CellCord x);
 
 	void debug();
 };

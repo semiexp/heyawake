@@ -16,6 +16,9 @@
     <Filter Include="ソース ファイル\core">
       <UniqueIdentifier>{1a727d03-03d6-4c51-a28d-483937226df2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\util">
+      <UniqueIdentifier>{1fdae4a2-8686-4ce5-a770-ecb6c7aa69f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -27,10 +30,16 @@
     <ClInclude Include="..\src\targetver.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\util\util.h">
+      <Filter>ソース ファイル\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\field.cpp">
+      <Filter>ソース ファイル\core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
