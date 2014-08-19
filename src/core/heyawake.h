@@ -63,11 +63,15 @@ class HYField
 	RSetId n_rsets;
 	RoomId n_rooms;
 	Status status;
+	CellId aux_cell;
 	Cell *field;
 	RestrictedSet *rsets;
 	Room *rooms;
 	char *pool;
 	int sz_pool;
+	
+	static int dx[4];
+	static int dy[4];
 
 	CellId Id(CellCord y, CellCord x) { return y * width + x; }
 	bool Range(CellCord y, CellCord x) { return 0 <= y && y < height && 0 <= x && x < width; }

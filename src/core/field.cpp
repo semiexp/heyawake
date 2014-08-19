@@ -3,6 +3,9 @@
 
 #include <cstdio>
 
+int HYField::dx[] = { -1, 0, 1, 0 };
+int HYField::dy[] = { 0, 1, 0, -1 };
+
 HYField::HYField()
 {
 	height = width = 0;
@@ -72,23 +75,22 @@ HYField::Status HYField::Load(HYProblem &prob)
 
 	n_rooms = prob.hint.size();
 	
-	sz_pool = sizeof(Cell) * height * width + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms + sizeof(RSetId) * nSetCells;
+	sz_pool = sizeof(Cell) * (height * width + 1) + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms + sizeof(RSetId) * nSetCells;
 	pool = new char[sz_pool];
 
 	field = (Cell*)pool;
-	rsets = (RestrictedSet*)(pool + sizeof(Cell) * height * width);
-	rooms = (Room*)(pool + sizeof(Cell) * height * width + sizeof(RestrictedSet) * n_rsets);
-	RSetId *rset_holder = (RSetId*)(pool + sizeof(Cell) * height * width + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms);
+	rsets = (RestrictedSet*)(pool + sizeof(Cell) * (height * width + 1));
+	rooms = (Room*)(pool + sizeof(Cell) * (height * width + 1) + sizeof(RestrictedSet) * n_rsets);
+	RSetId *rset_holder = (RSetId*)(pool + sizeof(Cell) * (height * width + 1) + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms);
 
-	for (int i = 0; i < height; ++i) {
-		for (int j = 0; j < width; ++j) {
-			int id = Id(i, j);
+	aux_cell = height * width;
 
-			field[id].stat = NORMAL;
-			field[id].n_conds = 0;
-			field[id].unit_root = -1;
-		}
+	for (int i = 0; i <= aux_cell; i++) {
+		field[i].stat = NORMAL;
+		field[i].n_conds = 0;
+		field[i].unit_root = -1;
 	}
+
 
 	RSetId rset_id = 0;
 	int rset_cell_id = 0;
