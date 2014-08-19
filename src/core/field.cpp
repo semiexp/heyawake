@@ -214,10 +214,7 @@ HYField::Status HYField::AssureConnectivity(CellCord y, CellCord x)
 	for (int i = 0; i < 4; i++) {
 		int y2 = y + dy[i] + dy[(i+3)%4], x2 = x + dx[i] + dx[(i+3)%4];
 
-		if (Range(y2, x2)) {
-			if (CellStatus(y2, x2) == BLACK) ids[i] = Id(y2, x2);
-			else ids[i] = -1;
-		} else ids[i] = aux_cell;
+		ids[i] = BlackUnitId(y2, x2);
 	}
 
 	ids[4] = ids[0];
@@ -232,6 +229,11 @@ HYField::Status HYField::AssureConnectivity(CellCord y, CellCord x)
 				}
 			}
 		}
+	}
+
+	if (0 < y && y < height - 1 && 0 < x && x < width - 1) {
+		if (ids[0] != -1 && ids[2] != -1 && Root(ids[0]) == Root(ids[2])) ret |= DetermineWhite(y, x);
+		if (ids[1] != -1 && ids[3] != -1 && Root(ids[1]) == Root(ids[3])) ret |= DetermineWhite(y, x);
 	}
 
 	return ret;
@@ -279,9 +281,8 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 	for (int i = 0; i < 4; ++i) {
 		int y2 = y + dy[i] + dy[(i+1)%4], x2 = x + dx[i] + dx[(i+1)%4];
 
-		if (Range(y2, x2)) {
-			if (CellStatus(y2, x2) == BLACK) Join(id, Id(y2, x2));
-		} else Join(id, aux_cell);
+		int id2 = BlackUnitId(y2, x2);
+		if (id2 != -1) Join(id, id2);
 	}
 
 	Exclude(id);
@@ -320,7 +321,56 @@ HYField::Status HYField::SolveRestrictedSet(RSetId sid)
 
 HYField::Status HYField::SolveRoom(RoomId rid)
 {
-	return NORMAL;
+	Room &room = rooms[rid];
+	Status ret = NORMAL;
+
+	int room_h = room.end_y - room.top_y, room_w = room.end_x - room.top_x;
+
+	// trivial case: number of black cells is already equal to the hint
+
+	CellId n_black = 0;
+
+	for (int i = room.top_y; i < room.end_y; ++i) {
+		for (int j = room.top_x; j < room.end_x; ++j) {
+			if (CellStatus(i, j) == BLACK) ++n_black;
+		}
+	}
+
+	if (n_black == room.hint) {
+		for (int i = room.top_y; i < room.end_y; ++i) {
+			for (int j = room.top_x; j < room.end_x; ++j) {
+				if (CellStatus(i, j) == UNDECIDED) ret |= DetermineWhite(i, j);
+			}
+		}
+	}
+
+	// 2 * 2 room
+
+	if (room_h == 2 && room_w == 2) {
+		int id1, id2;
+
+		id1 = BlackUnitId(room.top_y - 1, room.top_x - 1);
+		id2 = BlackUnitId(room.top_y + 2, room.top_x + 2);
+
+		if ((id1 != -1 && id2 != -1 && Root(id1) == Root(id2)) || CellStatus(room.top_y, room.top_x) == WHITE || CellStatus(room.top_y + 1, room.top_x + 1) == WHITE) {
+			ret |= DetermineWhite(room.top_y, room.top_x);
+			ret |= DetermineBlack(room.top_y, room.top_x + 1);
+			ret |= DetermineBlack(room.top_y + 1, room.top_x);
+			ret |= DetermineWhite(room.top_y + 1, room.top_x + 1);
+		}
+
+		id1 = BlackUnitId(room.top_y + 2, room.top_x - 1);
+		id2 = BlackUnitId(room.top_y - 1, room.top_x + 2);
+
+		if ((id1 != -1 && id2 != -1 && Root(id1) == Root(id2)) || CellStatus(room.top_y + 1, room.top_x) == WHITE || CellStatus(room.top_y, room.top_x + 1) == WHITE) {
+			ret |= DetermineBlack(room.top_y, room.top_x);
+			ret |= DetermineWhite(room.top_y, room.top_x + 1);
+			ret |= DetermineWhite(room.top_y + 1, room.top_x);
+			ret |= DetermineBlack(room.top_y + 1, room.top_x + 1);
+		}
+	}
+
+	return status |= ret;
 }
 
 HYField::Status HYField::SolveTrivialRoom(RoomId rid)
@@ -361,6 +411,8 @@ HYField::Status HYField::SolveTrivialRoom(RoomId rid)
 			}
 		}
 	}
+
+	ret |= SolveRoom(rid);
 
 	return ret;
 }
