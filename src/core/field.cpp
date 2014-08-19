@@ -49,7 +49,7 @@ HYField::HYField(const HYField &src)
 	}
 }
 
-void HYField::Load(HYProblem &prob)
+HYField::Status HYField::Load(HYProblem &prob)
 {
 	height = prob.height;
 	width = prob.width;
@@ -114,8 +114,6 @@ void HYField::Load(HYProblem &prob)
 					++field[id].n_conds;
 				}
 
-				rsets[rset_id].xor_id = 0;
-
 				++rset_id;
 			}
 		}
@@ -128,12 +126,10 @@ void HYField::Load(HYProblem &prob)
 
 				for (int x = room.top_x - 1; x < room.end_x + 1; ++x) {
 					int id = Id(y, x);
-
+					
 					rsets[rset_id].xor_id ^= id;
 					++field[id].n_conds;
 				}
-
-				rsets[rset_id].xor_id = 0;
 
 				++rset_id;
 			}
@@ -144,10 +140,11 @@ void HYField::Load(HYProblem &prob)
 
 	for (int i = 0; i < height; ++i) {
 		for (int j = 0; j < width; ++j) {
-			int id = Id(i, j);
+			CellId id = Id(i, j);
 
 			field[id].cond = rset_holder + rset_id;
 			rset_id += field[id].n_conds;
+
 		}
 	}
 
@@ -188,6 +185,11 @@ void HYField::Load(HYProblem &prob)
 			field[id].cond -= field[id].n_conds;
 		}
 	}
+
+	Status ret = NORMAL;
+	for (int i = 0; i < n_rooms; i++) ret |= SolveTrivialRoom(i);
+
+	return ret;
 }
 
 HYField::Status HYField::ExcludeFromRSet(RSetId sid, CellId cid)
@@ -202,7 +204,7 @@ HYField::Status HYField::ExcludeFromRSet(RSetId sid, CellId cid)
 HYField::Status HYField::Exclude(CellId cid)
 {
 	Status ret = NORMAL;
-	for (int i = 0; i < field[cid].n_conds; i++) {
+	for (int i = 0; i < field[cid].n_conds; ++i) {
 		ret |= ExcludeFromRSet(field[cid].cond[i], cid);
 	}
 
@@ -250,7 +252,7 @@ HYField::Status HYField::DetermineWhite(CellCord y, CellCord x)
 
 HYField::Status HYField::SolveRestrictedSet(RSetId sid)
 {
-	if (rsets[sid].rem_cells == 1 && !(rsets[sid].stat | BLACK)) {
+	if (rsets[sid].rem_cells == 1 && !(rsets[sid].stat & BLACK)) {
 		int cid = rsets[sid].xor_id;
 
 		return DetermineBlack(cid / width, cid % width);
@@ -262,6 +264,39 @@ HYField::Status HYField::SolveRestrictedSet(RSetId sid)
 HYField::Status HYField::SolveRoom(RoomId rid)
 {
 	return NORMAL;
+}
+
+HYField::Status HYField::SolveTrivialRoom(RoomId rid)
+{
+	Room &room = rooms[rid];
+	Status ret = NORMAL;
+
+	int room_h = room.end_y - room.top_y, room_w = room.end_x - room.top_x;
+
+	if (room.hint == 0) {
+		// hint == 0 (trivial)
+		for (int i = room.top_y; i < room.end_y; i++) {
+			for (int j = room.top_x; j < room.end_x; j++) {
+				ret |= DetermineWhite(i, j);
+			}
+		}
+	}
+
+	if (room_h == 1 && room_w == room.hint * 2 - 1) {
+		for (int i = 0; i < room_w; i++) {
+			if (i % 2 == 0) ret |= DetermineBlack(room.top_y, room.top_x + i);
+			else ret |= DetermineWhite(room.top_y, room.top_x + i);
+		}
+	}
+
+	if (room_w == 1 && room_h == room.hint * 2 - 1) {
+		for (int i = 0; i < room_h; i++) {
+			if (i % 2 == 0) ret |= DetermineBlack(room.top_y + i, room.top_x);
+			else ret |= DetermineWhite(room.top_y + i, room.top_x);
+		}
+	}
+
+	return ret;
 }
 
 void HYField::Debug()
@@ -299,7 +334,8 @@ void HYField::Debug()
 				fprintf(output, "%c%c%c",
 					field[Id(i / 2, j / 2)].stat == BLACK ? '[' : 
 					field[Id(i / 2, j / 2)].stat == WHITE ? '.' : ' ',
-					vHint != -1 ? (vHint + '0') : ' ',
+					vHint != -1 ? (vHint + '0') : 
+					field[Id(i / 2, j / 2)].stat == WHITE ? '.' : ' ',
 					field[Id(i / 2, j / 2)].stat == BLACK ? ']' :
 					field[Id(i / 2, j / 2)].stat == WHITE ? '.' : ' '
 				);
@@ -307,4 +343,7 @@ void HYField::Debug()
 		}
 		fprintf(output, "\n");
 	}
+
+	fprintf(output, "\n");
+
 }

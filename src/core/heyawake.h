@@ -76,6 +76,7 @@ class HYField
 	Status ExcludeFromRSet(RSetId sid, CellId cid);
 	Status SolveRestrictedSet(RSetId sid);
 	Status SolveRoom(RoomId rid); // (* TODO : necessary? *)
+	Status SolveTrivialRoom(RoomId rid); 
 
 public:
 	static const Status UNDECIDED = 0;
@@ -90,7 +91,7 @@ public:
 	HYField(HYProblem &prob);
 	HYField(const HYField &src);
 
-	void Load(HYProblem &prob);
+	Status Load(HYProblem &prob);
 
 	Status DetermineWhite(CellCord y, CellCord x);
 	Status DetermineBlack(CellCord y, CellCord x);
