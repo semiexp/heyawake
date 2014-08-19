@@ -86,6 +86,7 @@ HYField::Status HYField::Load(HYProblem &prob)
 
 			field[id].stat = NORMAL;
 			field[id].n_conds = 0;
+			field[id].unit_root = -1;
 		}
 	}
 
@@ -192,6 +193,16 @@ HYField::Status HYField::Load(HYProblem &prob)
 	return ret;
 }
 
+void HYField::Join(CellId p, CellId q)
+{
+	p = Root(p); q = Root(q);
+
+	if (p == q) return;
+
+	field[p].unit_root += field[q].unit_root;
+	field[q].unit_root = p;
+}
+
 HYField::Status HYField::ExcludeFromRSet(RSetId sid, CellId cid)
 {
 	rsets[sid].xor_id ^= cid;
@@ -220,12 +231,18 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 
 	Status ret = NORMAL;
 
+	/* TODO: Check the validity of the connection */
 	field[id].stat = BLACK;
 
 	if (Range(y - 1, x)) ret |= DetermineWhite(y - 1, x);
 	if (Range(y + 1, x)) ret |= DetermineWhite(y + 1, x);
 	if (Range(y, x - 1)) ret |= DetermineWhite(y, x - 1);
 	if (Range(y, x + 1)) ret |= DetermineWhite(y, x + 1);
+
+	if (Range(y - 1, x - 1) && CellStatus(y - 1, x - 1) == BLACK) Join(id, Id(y - 1, x - 1));
+	if (Range(y - 1, x + 1) && CellStatus(y - 1, x + 1) == BLACK) Join(id, Id(y - 1, x + 1));
+	if (Range(y + 1, x - 1) && CellStatus(y + 1, x - 1) == BLACK) Join(id, Id(y + 1, x - 1));
+	if (Range(y + 1, x + 1) && CellStatus(y + 1, x + 1) == BLACK) Join(id, Id(y + 1, x + 1));
 
 	Exclude(id);
 	ret |= SolveRoom(field[id].room_id);
@@ -293,6 +310,15 @@ HYField::Status HYField::SolveTrivialRoom(RoomId rid)
 		for (int i = 0; i < room_h; i++) {
 			if (i % 2 == 0) ret |= DetermineBlack(room.top_y + i, room.top_x);
 			else ret |= DetermineWhite(room.top_y + i, room.top_x);
+		}
+	}
+
+	if (room_h == 3 && room_w == 3 && room.hint == 5) {
+		for (int i = 0; i < 3; ++i) {
+			for (int j = 0; j < 3; ++j) {
+				if ((i + j) % 2 == 0) ret |= DetermineBlack(room.top_y + i, room.top_x + j);
+				else ret |= DetermineWhite(room.top_y + i, room.top_x + j);
+			}
 		}
 	}
 

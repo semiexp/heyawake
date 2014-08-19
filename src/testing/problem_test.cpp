@@ -8,6 +8,4 @@ void ProblemTest()
 	HYField field(prob);
 	field.Debug();
 
-	field.DetermineWhite(5, 0);
-	field.Debug();
 }
