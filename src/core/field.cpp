@@ -205,6 +205,38 @@ void HYField::Join(CellId p, CellId q)
 	field[q].unit_root = p;
 }
 
+HYField::Status HYField::AssureConnectivity(CellCord y, CellCord x)
+{
+	Status ret = NORMAL;
+
+	int ids[5];
+
+	for (int i = 0; i < 4; i++) {
+		int y2 = y + dy[i] + dy[(i+3)%4], x2 = x + dx[i] + dx[(i+3)%4];
+
+		if (Range(y2, x2)) {
+			if (CellStatus(y2, x2) == BLACK) ids[i] = Id(y2, x2);
+			else ids[i] = -1;
+		} else ids[i] = aux_cell;
+	}
+
+	ids[4] = ids[0];
+
+	for (int i = 0; i < 4; i++) {
+		int y2 = y + dy[i], x2 = x + dx[i];
+
+		if (Range(y2, x2)) {
+			if (ids[i] != -1 && ids[i + 1] != -1) {
+				if (Root(ids[i]) == Root(ids[i + 1])) {
+					ret |= DetermineWhite(y, x);
+				}
+			}
+		}
+	}
+
+	return ret;
+}
+
 HYField::Status HYField::ExcludeFromRSet(RSetId sid, CellId cid)
 {
 	rsets[sid].xor_id ^= cid;
@@ -233,6 +265,9 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 
 	Status ret = NORMAL;
 
+	AssureConnectivity(y, x);
+
+	if (field[id].stat == WHITE) return status |= INCONSISTENT;
 	/* TODO: Check the validity of the connection */
 	field[id].stat = BLACK;
 
@@ -241,10 +276,13 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 	if (Range(y, x - 1)) ret |= DetermineWhite(y, x - 1);
 	if (Range(y, x + 1)) ret |= DetermineWhite(y, x + 1);
 
-	if (Range(y - 1, x - 1) && CellStatus(y - 1, x - 1) == BLACK) Join(id, Id(y - 1, x - 1));
-	if (Range(y - 1, x + 1) && CellStatus(y - 1, x + 1) == BLACK) Join(id, Id(y - 1, x + 1));
-	if (Range(y + 1, x - 1) && CellStatus(y + 1, x - 1) == BLACK) Join(id, Id(y + 1, x - 1));
-	if (Range(y + 1, x + 1) && CellStatus(y + 1, x + 1) == BLACK) Join(id, Id(y + 1, x + 1));
+	for (int i = 0; i < 4; ++i) {
+		int y2 = y + dy[i] + dy[(i+1)%4], x2 = x + dx[i] + dx[(i+1)%4];
+
+		if (Range(y2, x2)) {
+			if (CellStatus(y2, x2) == BLACK) Join(id, Id(y2, x2));
+		} else Join(id, aux_cell);
+	}
 
 	Exclude(id);
 	ret |= SolveRoom(field[id].room_id);

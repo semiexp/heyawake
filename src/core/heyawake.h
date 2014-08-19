@@ -79,6 +79,7 @@ class HYField
 
 	CellId Root(CellId p) { return field[p].unit_root < 0 ? p : (field[p].unit_root = Root(field[p].unit_root)); }
 	void Join(CellId p, CellId q);
+	Status AssureConnectivity(CellCord y, CellCord x);
 
 	Status Exclude(CellId cid);
 	Status ExcludeFromRSet(RSetId sid, CellId cid);
