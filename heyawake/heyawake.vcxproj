@@ -83,11 +83,14 @@
   <ItemGroup>
     <ClInclude Include="..\src\core\heyawake.h" />
     <ClInclude Include="..\src\targetver.h" />
+    <ClInclude Include="..\src\testing\testing.h" />
     <ClInclude Include="..\src\util\util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\field.cpp" />
     <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\testing\problems.cpp" />
+    <ClCompile Include="..\src\testing\problem_test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

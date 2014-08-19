@@ -1,6 +1,8 @@
 
 #include "heyawake.h"
 
+#include <cstdio>
+
 HYField::HYField()
 {
 	height = width = 0;
@@ -83,6 +85,7 @@ void HYField::Load(HYProblem &prob)
 			int id = Id(i, j);
 
 			field[id].stat = NORMAL;
+			field[id].n_conds = 0;
 		}
 	}
 
@@ -136,13 +139,15 @@ void HYField::Load(HYProblem &prob)
 			}
 		}
 	}
+	
+	rset_id = 0;
 
 	for (int i = 0; i < height; ++i) {
 		for (int j = 0; j < width; ++j) {
 			int id = Id(i, j);
 
 			field[id].cond = rset_holder + rset_id;
-			rset_holder += field[id].n_conds;
+			rset_id += field[id].n_conds;
 		}
 	}
 
@@ -257,4 +262,49 @@ HYField::Status HYField::SolveRestrictedSet(RSetId sid)
 HYField::Status HYField::SolveRoom(RoomId rid)
 {
 	return NORMAL;
+}
+
+void HYField::Debug()
+{
+	FILE* output = stdout;
+
+	for (int i = 0; i <= 2 * height; i++) {
+		for (int j = 0; j <= 2 * width; j++) {
+			if (i % 2 == 0 && j % 2 == 0) {
+				fprintf(output, "+");
+			}
+
+			if (i % 2 == 0 && j % 2 != 0) {
+				bool edge = !Range(i / 2, j / 2) || !Range(i / 2 - 1, j / 2) || (field[Id(i / 2, j / 2)].room_id != field[Id(i / 2 - 1, j / 2)].room_id);
+
+				if (edge) fprintf(output, "---");
+				else fprintf(output, "   ");
+			}
+
+			if (i % 2 != 0 && j % 2 == 0) {
+				bool edge = !Range(i / 2, j / 2) || !Range(i / 2, j / 2 - 1) || (field[Id(i / 2, j / 2)].room_id != field[Id(i / 2, j / 2 - 1)].room_id);
+
+				if (edge) fprintf(output, "|");
+				else fprintf(output, " ");
+			}
+
+			if (i % 2 != 0 && j % 2 != 0) {
+				int vHint = -1;
+
+				int r_id = field[Id(i / 2, j / 2)].room_id;
+				if (rooms[r_id].top_y == i / 2 && rooms[r_id].top_x == j / 2) {
+					vHint = rooms[r_id].hint;
+				}
+
+				fprintf(output, "%c%c%c",
+					field[Id(i / 2, j / 2)].stat == BLACK ? '[' : 
+					field[Id(i / 2, j / 2)].stat == WHITE ? '.' : ' ',
+					vHint != -1 ? (vHint + '0') : ' ',
+					field[Id(i / 2, j / 2)].stat == BLACK ? ']' :
+					field[Id(i / 2, j / 2)].stat == WHITE ? '.' : ' '
+				);
+			}
+		}
+		fprintf(output, "\n");
+	}
 }

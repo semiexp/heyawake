@@ -95,5 +95,5 @@ public:
 	Status DetermineWhite(CellCord y, CellCord x);
 	Status DetermineBlack(CellCord y, CellCord x);
 
-	void debug();
+	void Debug();
 };

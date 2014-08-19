@@ -19,6 +19,9 @@
     <Filter Include="ソース ファイル\util">
       <UniqueIdentifier>{1fdae4a2-8686-4ce5-a770-ecb6c7aa69f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\testing">
+      <UniqueIdentifier>{5640a5e4-6905-4d65-8d8b-dea0101fdaa6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -33,6 +36,9 @@
     <ClInclude Include="..\src\util\util.h">
       <Filter>ソース ファイル\util</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\testing\testing.h">
+      <Filter>ソース ファイル\testing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
@@ -40,6 +46,12 @@
     </ClCompile>
     <ClCompile Include="..\src\core\field.cpp">
       <Filter>ソース ファイル\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\testing\problem_test.cpp">
+      <Filter>ソース ファイル\testing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\testing\problems.cpp">
+      <Filter>ソース ファイル\testing</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
