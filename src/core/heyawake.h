@@ -1,7 +1,9 @@
 
 #include <vector>
 
+class HYProblem;
 class HYField;
+class HYSolver;
 
 class HYProblem
 {
@@ -87,6 +89,7 @@ class HYField
 	Status SolveRoom(RoomId rid); // (* TODO : necessary? *)
 	Status SolveTrivialRoom(RoomId rid); 
 
+	friend class HYSolver;
 public:
 	static const Status UNDECIDED = 0;
 	static const Status WHITE = 1;
@@ -106,4 +109,10 @@ public:
 	Status DetermineBlack(CellCord y, CellCord x);
 
 	void Debug();
+};
+
+class HYSolver
+{
+public:
+	static HYField::Status AssureConnectivity(HYField &field);
 };

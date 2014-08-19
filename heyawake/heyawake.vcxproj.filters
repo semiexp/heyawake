@@ -53,5 +53,8 @@
     <ClCompile Include="..\src\testing\problems.cpp">
       <Filter>ソース ファイル\testing</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\solver.cpp">
+      <Filter>ソース ファイル\core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

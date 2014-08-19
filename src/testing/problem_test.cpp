@@ -8,4 +8,6 @@ void ProblemTest()
 	HYField field(prob);
 	field.Debug();
 
+	printf("%d\n", (int)HYSolver::AssureConnectivity(field));
+	field.Debug();
 }
