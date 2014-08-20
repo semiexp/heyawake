@@ -91,6 +91,7 @@ class HYField
 	Status SolveTrivialRoom(RoomId rid); 
 
 	friend class HYSolver;
+
 public:
 	static const Status UNDECIDED = 0;
 	static const Status WHITE = 1;
@@ -116,4 +117,17 @@ class HYSolver
 {
 public:
 	static HYField::Status AssureConnectivity(HYField &field);
+};
+
+class HYRoomDatabase
+{
+	static std::vector<std::vector<int> > room;
+	static int index[10][10][10];
+
+	static void Visit(int y, int x, int state, int hint, int height, int width, std::vector<int> &sto);
+	static void PreCalc(int height, int width, int hint);
+
+public:
+	static void Initialize();
+	static std::vector<int> &Fetch(int height, int width, int hint);
 };

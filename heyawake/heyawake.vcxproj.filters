@@ -56,5 +56,8 @@
     <ClCompile Include="..\src\core\solver.cpp">
       <Filter>ソース ファイル\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\room_db.cpp">
+      <Filter>ソース ファイル\core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
