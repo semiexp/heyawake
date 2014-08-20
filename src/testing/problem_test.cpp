@@ -3,7 +3,7 @@
 
 void ProblemTest()
 {
-	HYProblem prob = GetTestProblem(0);
+	HYProblem prob = GetTestProblem(1);
 
 	HYField field(prob);
 	field.Debug();

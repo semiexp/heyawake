@@ -346,7 +346,7 @@ HYField::Status HYField::SolveRoom(RoomId rid)
 
 	// 2 * 2 room
 
-	if (room_h == 2 && room_w == 2) {
+	if (room_h == 2 && room_w == 2 && room.hint == 2) {
 		int id1, id2;
 
 		id1 = BlackUnitId(room.top_y - 1, room.top_x - 1);
