@@ -59,5 +59,11 @@
     <ClCompile Include="..\src\core\room_db.cpp">
       <Filter>ソース ファイル\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\field_loader.cpp">
+      <Filter>ソース ファイル\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\field_room_solver.cpp">
+      <Filter>ソース ファイル\core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
