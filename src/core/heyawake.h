@@ -78,7 +78,7 @@ class HYField
 	CellId Id(CellCord y, CellCord x) { return y * width + x; }
 	bool Range(CellCord y, CellCord x) { return 0 <= y && y < height && 0 <= x && x < width; }
 	Status CellStatus(CellCord y, CellCord x) { return field[Id(y, x)].stat; }
-	CellId BlackUnitId(CellCord y, CellCord x) { return Range(y, x) ? (CellStatus(y, x) == BLACK ? Root(Id(y, x)) : -1) : aux_cell; }
+	CellId BlackUnitId(CellCord y, CellCord x) { return Range(y, x) ? (CellStatus(y, x) == BLACK ? Root(Id(y, x)) : -1) : Root(aux_cell); }
 
 	CellId Root(CellId p) { return field[p].unit_root < 0 ? p : (field[p].unit_root = Root(field[p].unit_root)); }
 	void Join(CellId p, CellId q);
@@ -118,6 +118,7 @@ class HYSolver
 {
 public:
 	static HYField::Status AssureConnectivity(HYField &field);
+	static HYField::Status CheckAllRoom(HYField &field);
 };
 
 class HYRoomDatabase

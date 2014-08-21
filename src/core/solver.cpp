@@ -17,3 +17,14 @@ HYField::Status HYSolver::AssureConnectivity(HYField &field)
 
 	return ret;
 }
+
+HYField::Status HYSolver::CheckAllRoom(HYField &field)
+{
+	HYField::Status ret = HYField::NORMAL;
+
+	for (int i = 0; i < field.n_rooms; i++) {
+		ret |= field.SolveRoom(i);
+	}
+
+	return ret;
+}

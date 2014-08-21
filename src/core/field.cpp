@@ -131,17 +131,17 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 	/* TODO: Check the validity of the connection */
 	field[id].stat = BLACK;
 
-	if (Range(y - 1, x)) ret |= DetermineWhite(y - 1, x);
-	if (Range(y + 1, x)) ret |= DetermineWhite(y + 1, x);
-	if (Range(y, x - 1)) ret |= DetermineWhite(y, x - 1);
-	if (Range(y, x + 1)) ret |= DetermineWhite(y, x + 1);
-
 	for (int i = 0; i < 4; ++i) {
-		int y2 = y + dy[i] + dy[(i+1)%4], x2 = x + dx[i] + dx[(i+1)%4];
+		int y2 = y + dy[i] + dy[(i + 1) % 4], x2 = x + dx[i] + dx[(i + 1) % 4];
 
 		int id2 = BlackUnitId(y2, x2);
 		if (id2 != -1) Join(id, id2);
 	}
+
+	if (Range(y - 1, x)) ret |= DetermineWhite(y - 1, x);
+	if (Range(y + 1, x)) ret |= DetermineWhite(y + 1, x);
+	if (Range(y, x - 1)) ret |= DetermineWhite(y, x - 1);
+	if (Range(y, x + 1)) ret |= DetermineWhite(y, x + 1);
 
 	Exclude(id);
 	ret |= SolveRoom(field[id].room_id);

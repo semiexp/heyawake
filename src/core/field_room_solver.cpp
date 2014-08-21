@@ -43,16 +43,19 @@ HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
 
 			bool aux_flg = false;
 
-			for (int j = 0; j < 4; j++) {
-				int y2 = y + dy[j] + dy[(j + 1) % 4], x2 = x + dx[j] + dx[(j + 1) % 4];
-				int bid = BlackUnitId(y2, x2);
+			if (CellStatus(y, x) != BLACK) { // TODO
+				for (int j = 0; j < 4; j++) {
+					int y2 = y + dy[j] + dy[(j + 1) % 4], x2 = x + dx[j] + dx[(j + 1) % 4];
+					int bid = BlackUnitId(y2, x2);
 
-				if (bid == -1) continue;
-				if (bid == aux_cell) aux_flg = true;
-				else adjs.push_back(bid);
+					if (Range(y2, x2) && field[Id(y2, x2)].room_id == rid) continue;
+					if (bid == -1) continue;
+					if (bid == Root(aux_cell)) aux_flg = true;
+					else adjs.push_back(bid);
+				}
+
+				if (aux_flg) ++n_aux;
 			}
-
-			if (aux_flg) ++n_aux;
 
 			if (CellStatus(y, x) == BLACK) repr = Root(y * width + x);
 
@@ -77,7 +80,10 @@ HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
 		continue;
 	}
 
-	if (cand == -1) return status |= INCONSISTENT;
+	if (cand == -1) {
+		return status |= INCONSISTENT;
+	}
+
 	if (cand != -2) {
 		for (int i = 0; i < room_h; ++i) {
 			for (int j = 0; j < room_w; ++j) {
