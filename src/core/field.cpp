@@ -2,6 +2,7 @@
 #include "heyawake.h"
 
 #include <cstdio>
+#include <algorithm>
 
 int HYField::dx[] = { -1, 0, 1, 0 };
 int HYField::dy[] = { 0, 1, 0, -1 };
@@ -337,15 +338,60 @@ HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
 		}
 	}
 
-	std::vector<int> db = HYRoomDatabase::Fetch(room_h, room_w, room.hint);
+	std::vector<int> &db = HYRoomDatabase::Fetch(room_h, room_w, room.hint);
+	auto &det = HYRoomDatabase::FetchDetail(room_h, room_w, room.hint);
 
 	int cand = -1;
-	for (int bit : db) {
-		if ((black & ~bit) == 0 && (white & bit) == 0) {
-			if (cand == -1) {
-				cand = bit;
-			} else cand = -2;
+
+	for (int i = 0; i < db.size(); i++) {
+		int bit = db[i];
+		
+		// simple check
+		if (!((black & ~bit) == 0 && (white & bit) == 0)) continue;
+
+		int n_aux = 0, repr = -1;
+		std::vector<int> adjs;
+
+		for (int pt : det[i]) {
+			bool end_flg = pt < 0;
+			if (pt < 0) pt = ~pt;
+
+			int y = room.top_y + pt / room_w, x = room.top_x + pt % room_w;
+
+			bool aux_flg = false;
+
+			for (int j = 0; j < 4; j++) {
+				int y2 = y + dy[j] + dy[(j + 1) % 4], x2 = x + dx[j] + dx[(j + 1) % 4];
+				int bid = BlackUnitId(y2, x2);
+
+				if (bid == -1) continue;
+				if (bid == aux_cell) aux_flg = true;
+				else adjs.push_back(bid);
+			}
+
+			if (aux_flg) ++n_aux;
+
+			if (CellStatus(y, x) == BLACK) repr = Root(y * width + x);
+
+			if (end_flg) {
+				if (n_aux >= 2) goto next;
+
+				std::sort(adjs.begin(), adjs.end());
+
+				for (int j = 1; j < adjs.size(); j++) if (adjs[j] != repr && adjs[j] == adjs[j - 1]) goto next;
+
+				n_aux = 0;
+				repr = -1;
+				adjs.clear();
+			}
 		}
+
+		// update
+		if (cand == -1) cand = bit;
+		else cand = -2;
+
+	next:
+		continue;
 	}
 
 	if (cand == -1) return status |= INCONSISTENT;

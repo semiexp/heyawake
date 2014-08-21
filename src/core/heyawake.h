@@ -78,7 +78,7 @@ class HYField
 	CellId Id(CellCord y, CellCord x) { return y * width + x; }
 	bool Range(CellCord y, CellCord x) { return 0 <= y && y < height && 0 <= x && x < width; }
 	Status CellStatus(CellCord y, CellCord x) { return field[Id(y, x)].stat; }
-	CellId BlackUnitId(CellCord y, CellCord x) { return Range(y, x) ? (CellStatus(y, x) == BLACK ? Id(y, x) : -1) : aux_cell; }
+	CellId BlackUnitId(CellCord y, CellCord x) { return Range(y, x) ? (CellStatus(y, x) == BLACK ? Root(Id(y, x)) : -1) : aux_cell; }
 
 	CellId Root(CellId p) { return field[p].unit_root < 0 ? p : (field[p].unit_root = Root(field[p].unit_root)); }
 	void Join(CellId p, CellId q);
@@ -123,13 +123,16 @@ public:
 class HYRoomDatabase
 {
 	static std::vector<std::vector<int> > room;
+	static std::vector<std::vector<std::vector<int> > > detail;
+
 	static int index[10][10][10];
 
-	static void Visit(int y, int x, int state, int hint, int height, int width, std::vector<int> &sto);
+	static void Visit(int y, int x, int state, int hint, int height, int width, std::vector<int> &sto, std::vector<std::vector<int> > &sto_detail);
 	static void PreCalc(int height, int width, int hint);
 
 public:
 	static void Initialize();
 	static bool IsAvailable(int height, int width, int hint) { return hint >= 0 && index[height][width][hint] >= 0; }
 	static std::vector<int> &Fetch(int height, int width, int hint) { return room[index[height][width][hint]]; }
+	static std::vector<std::vector<int> > &FetchDetail(int height, int width, int hint) { return detail[index[height][width][hint]]; }
 };

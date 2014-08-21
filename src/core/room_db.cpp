@@ -1,7 +1,9 @@
 
 #include "heyawake.h"
+#include <algorithm>
 
 std::vector<std::vector<int> > HYRoomDatabase::room;
+std::vector<std::vector<std::vector<int> > > HYRoomDatabase::detail;
 int HYRoomDatabase::index[10][10][10];
 
 struct union_find
@@ -22,7 +24,7 @@ struct union_find
 	}
 };
 
-void HYRoomDatabase::Visit(int y, int x, int state, int hint, int height, int width, std::vector<int> &sto)
+void HYRoomDatabase::Visit(int y, int x, int state, int hint, int height, int width, std::vector<int> &sto, std::vector<std::vector<int> > &sto_detail)
 {
 	if (y == height) {
 		if (hint > 0) return;
@@ -45,12 +47,34 @@ void HYRoomDatabase::Visit(int y, int x, int state, int hint, int height, int wi
 				}
 			}
 		}
+
+		std::vector<std::pair<int, int> > blacks;
+
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				if (!(state & (1 << (i * width + j)))) continue;
+
+				blacks.push_back(std::make_pair(uf.root(i * width + j), i * width + j));
+			}
+		}
+
+		std::sort(blacks.begin(), blacks.end());
+
+		std::vector<int> t_detail;
+
+		for (int i = 0; i < blacks.size(); i++) {
+			if (i == blacks.size() - 1 || blacks[i].first != blacks[i+1].first) t_detail.push_back(~blacks[i].second);
+			else t_detail.push_back(blacks[i].second);
+		}
+
 		sto.push_back(state);
+		sto_detail.push_back(t_detail);
+
 		return;
 	}
 
 	if (x == width) {
-		Visit(y + 1, 0, state, hint, height, width, sto);
+		Visit(y + 1, 0, state, hint, height, width, sto, sto_detail);
 		return;
 	}
 
@@ -59,21 +83,23 @@ void HYRoomDatabase::Visit(int y, int x, int state, int hint, int height, int wi
 	if (y > 0) allowed_black &= !(state & (1 << ((y - 1) * width + x)));
 
 	if (allowed_black) {
-		Visit(y, x + 1, state | (1 << (y * width + x)), hint - 1, height, width, sto);
+		Visit(y, x + 1, state | (1 << (y * width + x)), hint - 1, height, width, sto, sto_detail);
 	}
 
-	Visit(y, x + 1, state, hint, height, width, sto);
+	Visit(y, x + 1, state, hint, height, width, sto, sto_detail);
 }
 
 void HYRoomDatabase::PreCalc(int height, int width, int hint)
 {
 	std::vector<int> ret;
+	std::vector<std::vector<int> > ret_detail;
 
-	Visit(0, 0, 0, hint, height, width, ret);
+	Visit(0, 0, 0, hint, height, width, ret, ret_detail);
 
 	index[height][width][hint] = room.size();
 	printf("%d %d %d: %d\n", height, width, hint, ret.size());
 	room.push_back(ret);
+	detail.push_back(ret_detail);
 
 	if (height < width) PreCalc(width, height, hint);
 }
