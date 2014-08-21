@@ -130,6 +130,6 @@ class HYRoomDatabase
 
 public:
 	static void Initialize();
-	static bool IsAvailable(int height, int width, int hint) { return index[height][width][hint] >= 0; }
+	static bool IsAvailable(int height, int width, int hint) { return hint >= 0 && index[height][width][hint] >= 0; }
 	static std::vector<int> &Fetch(int height, int width, int hint) { return room[index[height][width][hint]]; }
 };
