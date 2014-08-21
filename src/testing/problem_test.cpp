@@ -5,7 +5,7 @@ void ProblemTest()
 {
 	HYRoomDatabase::Initialize();
 
-	HYProblem prob = GetTestProblem(1);
+	HYProblem prob = GetTestProblem(2);
 
 	HYField field(prob);
 	field.Debug();
