@@ -4,10 +4,48 @@
 std::vector<std::vector<int> > HYRoomDatabase::room;
 int HYRoomDatabase::index[10][10][10];
 
+struct union_find
+{
+	int *val;
+	int N;
+
+	union_find(int N) : N(N) { val = new int[N]; for (int i = 0; i < N; i++) val[i] = -1; }
+	~union_find() { delete[] val; }
+
+	int root(int p) { return val[p] < 0 ? p : (val[p] = root(val[p])); }
+	bool join(int p, int q) {
+		p = root(p); q = root(q);
+		if (p == q) return true;
+		val[p] += val[q];
+		val[q] = p;
+		return false;
+	}
+};
+
 void HYRoomDatabase::Visit(int y, int x, int state, int hint, int height, int width, std::vector<int> &sto)
 {
 	if (y == height) {
-		if (hint == 0) sto.push_back(state);
+		if (hint > 0) return;
+
+		union_find uf(height * width);
+
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				if (!(state & (1 << (i * width + j)))) continue;
+
+				if (i > 0) {
+					if (j > 0) {
+						if (state & (1 << ((i - 1) * width + (j - 1))))
+							if (uf.join(i * width + j, (i - 1) * width + (j - 1))) return;
+					}
+					if (j < width - 1) {
+						if (state & (1 << ((i - 1) * width + (j + 1))))
+							if (uf.join(i * width + j, (i - 1) * width + (j + 1))) return;
+					}
+				}
+			}
+		}
+		sto.push_back(state);
 		return;
 	}
 
@@ -72,5 +110,7 @@ void HYRoomDatabase::Initialize()
 	PreCalc(3, 3, 3);
 	PreCalc(3, 3, 4);
 	PreCalc(3, 3, 5);
-	PreCalc(4, 4, 6);
+	PreCalc(3, 4, 5);
+	PreCalc(3, 5, 7);
+	PreCalc(4, 4, 7);
 }

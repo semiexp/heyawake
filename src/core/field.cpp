@@ -319,6 +319,48 @@ HYField::Status HYField::SolveRestrictedSet(RSetId sid)
 	return NORMAL;
 }
 
+HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
+{
+	Room &room = rooms[rid];
+	Status ret = NORMAL;
+
+	int room_h = room.end_y - room.top_y, room_w = room.end_x - room.top_x;
+
+	int black = 0, white = 0;
+
+	for (int i = 0; i < room_h; ++i) {
+		for (int j = 0; j < room_w; ++j) {
+			HYField::Status c_stat = CellStatus(room.top_y + i, room.top_x + j);
+
+			if (c_stat == BLACK) black |= 1 << (i * room_w + j);
+			if (c_stat == WHITE) white |= 1 << (i * room_w + j);
+		}
+	}
+
+	std::vector<int> db = HYRoomDatabase::Fetch(room_h, room_w, room.hint);
+
+	int cand = -1;
+	for (int bit : db) {
+		if ((black & ~bit) == 0 && (white & bit) == 0) {
+			if (cand == -1) {
+				cand = bit;
+			} else cand = -2;
+		}
+	}
+
+	if (cand == -1) return status |= INCONSISTENT;
+	if (cand != -2) {
+		for (int i = 0; i < room_h; ++i) {
+			for (int j = 0; j < room_w; ++j) {
+				if (cand & (1 << (i * room_w + j))) ret |= DetermineBlack(room.top_y + i, room.top_x + j);
+				else ret |= DetermineWhite(room.top_y + i, room.top_x + j);
+			}
+		}
+	}
+
+	return ret;
+}
+
 HYField::Status HYField::SolveRoom(RoomId rid)
 {
 	Room &room = rooms[rid];
@@ -327,6 +369,8 @@ HYField::Status HYField::SolveRoom(RoomId rid)
 	int room_h = room.end_y - room.top_y, room_w = room.end_x - room.top_x;
 
 	// trivial case: number of black cells is already equal to the hint
+
+	if (HYRoomDatabase::IsAvailable(room_h, room_w, room.hint)) ret |= SolveRoomWithDatabase(rid);
 
 	CellId n_black = 0;
 

@@ -87,7 +87,8 @@ class HYField
 	Status Exclude(CellId cid);
 	Status ExcludeFromRSet(RSetId sid, CellId cid);
 	Status SolveRestrictedSet(RSetId sid);
-	Status SolveRoom(RoomId rid); // (* TODO : necessary? *)
+	Status SolveRoom(RoomId rid);
+	Status SolveRoomWithDatabase(RoomId rid);
 	Status SolveTrivialRoom(RoomId rid); 
 
 	friend class HYSolver;
@@ -129,5 +130,6 @@ class HYRoomDatabase
 
 public:
 	static void Initialize();
-	static std::vector<int> &Fetch(int height, int width, int hint);
+	static bool IsAvailable(int height, int width, int hint) { return index[height][width][hint] >= 0; }
+	static std::vector<int> &Fetch(int height, int width, int hint) { return room[index[height][width][hint]]; }
 };
