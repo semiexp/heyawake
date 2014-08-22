@@ -84,6 +84,32 @@ int problem3[][5] =
 	{ 6, 8, 4, 2, -1 }
 };
 
+/*
+Source: http://www.nikoli.com/en/puzzles/heyawake/ Sample 3
+*/
+
+int problem4[][5] =
+{
+	{ 0, 0, 3, 2, 2 },
+	{ 0, 2, 3, 2, 2 },
+	{ 0, 4, 1, 4, -1 },
+	{ 0, 8, 3, 2, -1 },
+	{ 1, 4, 2, 4, 3 },
+	{ 3, 0, 3, 2, 1 },
+	{ 3, 2, 3, 3, 5 },
+	{ 3, 5, 3, 3, -1 },
+	{ 3, 8, 3, 2, 3 },
+	{ 6, 0, 2, 2, 2 },
+	{ 6, 2, 1, 3, -1 },
+	{ 6, 5, 1, 3, 2 },
+	{ 6, 8, 3, 2, 2 },
+	{ 7, 2, 3, 2, 2 },
+	{ 7, 4, 3, 2, 2 },
+	{ 7, 6, 3, 2, 2 },
+	{ 8, 0, 2, 2, 1 },
+	{ 9, 8, 1, 2, -1 }
+};
+
 HYProblem GetTestProblem(int pid)
 {
 	HYProblem ret;
@@ -104,6 +130,11 @@ HYProblem GetTestProblem(int pid)
 		ret = HYProblem(10, 10);
 		src = problem3;
 		len = sizeof(problem3) / (5 * sizeof(int));
+		break;
+	case 3:
+		ret = HYProblem(10, 10);
+		src = problem4;
+		len = sizeof(problem4) / (5 * sizeof(int));
 		break;
 	}
 
