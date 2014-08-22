@@ -4,3 +4,4 @@
 HYProblem GetTestProblem(int pid);
 
 void ProblemTest();
+void PerformanceTest();

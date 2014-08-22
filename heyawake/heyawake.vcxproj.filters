@@ -65,5 +65,8 @@
     <ClCompile Include="..\src\core\field_room_solver.cpp">
       <Filter>ソース ファイル\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\testing\perf_test.cpp">
+      <Filter>ソース ファイル\testing</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
