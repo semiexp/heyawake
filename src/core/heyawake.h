@@ -59,6 +59,8 @@ class HYField
 
 		Room() : top_y(-1), top_x(-1), end_y(-1), end_x(-1), hint(-1) {}
 		Room(CellCord ty, CellCord tx, CellCord ey, CellCord ex, CellId hint) : top_y(ty), top_x(tx), end_y(ey), end_x(ex), hint(hint) {}
+
+		bool CellInclude(CellCord y, CellCord x) { return top_y <= y && y < end_y && top_x <= x && x < end_x; }
 	};
 
 	CellCord height, width;
@@ -110,6 +112,8 @@ public:
 
 	Status DetermineWhite(CellCord y, CellCord x);
 	Status DetermineBlack(CellCord y, CellCord x);
+
+	Status GetStatus() { return status; }
 
 	void Debug();
 };

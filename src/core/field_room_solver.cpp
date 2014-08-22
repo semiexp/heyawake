@@ -64,7 +64,8 @@ HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
 
 				std::sort(adjs.begin(), adjs.end());
 
-				for (int j = 1; j < adjs.size(); j++) if (adjs[j] != repr && adjs[j] == adjs[j - 1]) goto next;
+				if (adjs.size() > 0 && adjs[0] == repr) goto next;
+				for (int j = 1; j < adjs.size(); j++) if (adjs[j] == repr || adjs[j] == adjs[j - 1]) goto next;
 
 				n_aux = 0;
 				repr = -1;

@@ -5,7 +5,7 @@ void ProblemTest()
 {
 	HYRoomDatabase::Initialize();
 
-	HYProblem prob = GetTestProblem(0);
+	HYProblem prob = GetTestProblem(2);
 
 	HYField field(prob);
 	field.Debug();
@@ -16,5 +16,6 @@ void ProblemTest()
 	printf("%d\n", (int)HYSolver::AssureConnectivity(field));
 	printf("%d\n", (int)HYSolver::CheckAllRoom(field));
 	printf("%d\n", (int)HYSolver::AssureConnectivity(field));
+	printf("%d\n", (int)field.GetStatus());
 	field.Debug();
 }
