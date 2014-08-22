@@ -68,6 +68,7 @@ class HYField
 	RoomId n_rooms;
 	Status status;
 	CellId aux_cell;
+	CellId progress;
 	Cell *field;
 	RestrictedSet *rsets;
 	Room *rooms;
@@ -114,6 +115,7 @@ public:
 	Status DetermineBlack(CellCord y, CellCord x);
 
 	Status GetStatus() { return status; }
+	CellId GetProgress() { return progress; }
 
 	void Debug();
 };

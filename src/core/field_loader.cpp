@@ -9,6 +9,7 @@ HYField::Status HYField::Load(HYProblem &prob)
 	n_rsets = 0;
 	int nSetCells = 0;
 	status = NORMAL;
+	progress = 0;
 
 	for (int i = 0; i < prob.hint.size(); i++) {
 		if (0 < prob.top_y[i] && prob.end_y[i] < height) {

@@ -18,6 +18,7 @@ HYField::HYField()
 	rooms = nullptr;
 	pool = nullptr;
 	sz_pool = 0;
+	progress = 0;
 
 	status = NORMAL;
 }
@@ -34,6 +35,7 @@ HYField::HYField(const HYField &src)
 	n_rsets = src.n_rsets;
 	n_rooms = src.n_rooms;
 	status = src.status;
+	progress = 0;
 
 	sz_pool = src.sz_pool;
 	pool = new char[sz_pool];
@@ -130,6 +132,9 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 	if (field[id].stat == WHITE) return status |= INCONSISTENT;
 	/* TODO: Check the validity of the connection */
 	field[id].stat = BLACK;
+	++progress;
+
+	if (progress == height * width) { ret |= SOLVED; }
 
 	for (int i = 0; i < 4; ++i) {
 		int y2 = y + dy[i] + dy[(i + 1) % 4], x2 = x + dx[i] + dx[(i + 1) % 4];
@@ -159,6 +164,9 @@ HYField::Status HYField::DetermineWhite(CellCord y, CellCord x)
 	Status ret = NORMAL;
 
 	field[id].stat = WHITE;
+	++progress;
+
+	if (progress == height * width) { ret |= SOLVED; }
 
 	Exclude(id);
 	ret |= SolveRoom(field[id].room_id);
