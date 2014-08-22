@@ -125,6 +125,8 @@ class HYSolver
 public:
 	static HYField::Status AssureConnectivity(HYField &field);
 	static HYField::Status CheckAllRoom(HYField &field);
+
+	static HYField::Status Solve(HYField &field);
 };
 
 class HYRoomDatabase

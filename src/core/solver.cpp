@@ -1,6 +1,21 @@
 
 #include "heyawake.h"
 
+HYField::Status HYSolver::Solve(HYField &field)
+{
+	int cur_progress;
+	HYField::Status ret = HYField::NORMAL;
+
+	do {
+		cur_progress = field.GetProgress();
+
+		ret |= AssureConnectivity(field);
+		ret |= CheckAllRoom(field);
+	} while (ret == HYField::NORMAL && cur_progress != field.GetProgress());
+
+	return ret;
+}
+
 HYField::Status HYSolver::AssureConnectivity(HYField &field)
 {
 	int height = field.height, width = field.width;
