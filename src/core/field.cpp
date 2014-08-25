@@ -55,6 +55,11 @@ HYField::HYField(const HYField &src)
 	}
 }
 
+HYField::~HYField()
+{
+	delete[] pool;
+}
+
 void HYField::Join(CellId p, CellId q)
 {
 	p = Root(p); q = Root(q);

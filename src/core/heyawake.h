@@ -108,6 +108,7 @@ public:
 	HYField();
 	HYField(HYProblem &prob);
 	HYField(const HYField &src);
+	~HYField();
 
 	Status Load(HYProblem &prob);
 
