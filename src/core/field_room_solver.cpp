@@ -27,6 +27,18 @@ HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
 	int tb_black = (1 << (room_h * room_w)) - 1;
 	int tb_white = tb_black;
 
+	int n_cand = 0;
+
+	for (int i = 0; i < db.size(); i++) {
+		int bit = db[i];
+
+		// simple check
+		if (!((black & ~bit) == 0 && (white & bit) == 0)) continue;
+		++n_cand;
+	}
+
+	if (n_cand > 10) return NORMAL;
+
 	for (int i = 0; i < db.size(); i++) {
 		int bit = db[i];
 
@@ -78,6 +90,7 @@ HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
 		tb_black &= bit;
 		tb_white &= ~bit;
 
+		if (tb_black == 0 && tb_white == 0) break;
 	next:
 		continue;
 	}

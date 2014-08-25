@@ -13,7 +13,7 @@ void PerformanceTest()
 	start = clock();
 
 	for (int i = 0; i < trial; i++) {
-		HYProblem prob = GetTestProblem(3);
+		HYProblem prob = GetTestProblem(2);
 
 		HYField field(prob);
 		HYSolver::Solve(field);
