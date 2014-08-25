@@ -31,11 +31,16 @@ class HYField
 	struct RestrictedSet;
 	struct Room;
 
-	typedef char Status;
-	typedef char CellCord;
-	typedef short CellId;
-	typedef short RSetId;
-	typedef short RoomId;
+	//typedef char Status;
+	//typedef char CellCord;
+	//typedef short CellId;
+	//typedef short RSetId;
+	//typedef short RoomId;
+	typedef int Status;
+	typedef int CellCord;
+	typedef int CellId;
+	typedef int RSetId;
+	typedef int RoomId;
 
 	struct Cell
 	{
