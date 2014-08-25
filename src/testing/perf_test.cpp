@@ -6,7 +6,7 @@
 void PerformanceTest()
 {
 	clock_t start, end;
-	const int trial = 1000;
+	const int trial = 20000;
 
 	HYRoomDatabase::Initialize();
 

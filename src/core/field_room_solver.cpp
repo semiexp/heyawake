@@ -24,7 +24,8 @@ HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
 	std::vector<int> &db = HYRoomDatabase::Fetch(room_h, room_w, room.hint);
 	auto &det = HYRoomDatabase::FetchDetail(room_h, room_w, room.hint);
 
-	int cand = -1;
+	int tb_black = (1 << (room_h * room_w)) - 1;
+	int tb_white = tb_black;
 
 	for (int i = 0; i < db.size(); i++) {
 		int bit = db[i];
@@ -74,26 +75,20 @@ HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
 		}
 
 		// update
-		if (cand == -1) cand = bit;
-		else cand = -2;
+		tb_black &= bit;
+		tb_white &= ~bit;
 
 	next:
 		continue;
 	}
 
-	if (cand == -1) {
-		return status |= INCONSISTENT;
-	}
-
-	if (cand != -2) {
-		for (int i = 0; i < room_h; ++i) {
-			for (int j = 0; j < room_w; ++j) {
-				if (cand & (1 << (i * room_w + j))) ret |= DetermineBlack(room.top_y + i, room.top_x + j);
-				else ret |= DetermineWhite(room.top_y + i, room.top_x + j);
-			}
+	for (int i = 0; i < room_h; i++) {
+		for (int j = 0; j < room_w; j++) {
+			if (tb_black & (1 << (i * room_w + j))) ret |= DetermineBlack(room.top_y + i, room.top_x + j);
+			if (tb_white & (1 << (i * room_w + j))) ret |= DetermineWhite(room.top_y + i, room.top_x + j);
 		}
 	}
-
+	
 	return ret;
 }
 
