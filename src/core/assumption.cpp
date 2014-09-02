@@ -44,4 +44,6 @@ HYField::Status HYSolver::Assume(HYField &field)
 
 		if (update) Solve(field);
 	} while (update);
+
+	return ret;
 }
