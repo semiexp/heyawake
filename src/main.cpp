@@ -5,8 +5,8 @@
 
 int main(int argc, char* argv[])
 {
-	//ProblemTest();
-	PerformanceTest();
+	ProblemTest(5);
+	//PerformanceTest();
 
 	return 0;
 }

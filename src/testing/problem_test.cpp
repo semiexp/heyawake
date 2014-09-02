@@ -1,11 +1,11 @@
 
 #include "testing.h"
 
-void ProblemTest()
+void ProblemTest(int pid)
 {
 	HYRoomDatabase::Initialize();
 
-	HYProblem prob = GetTestProblem(3);
+	HYProblem prob = GetTestProblem(pid);
 
 	HYField field(prob);
 	field.Debug();
