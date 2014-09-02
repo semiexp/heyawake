@@ -97,7 +97,8 @@ class HYField
 	Status SolveRestrictedSet(RSetId sid);
 	Status SolveRoom(RoomId rid);
 	Status SolveRoomWithDatabase(RoomId rid);
-	Status SolveTrivialRoom(RoomId rid); 
+	Status SolveVirtualRoom(int top_y, int top_x, int end_y, int end_x, int hint);
+	Status SolveTrivialRoom(RoomId rid);
 
 	friend class HYSolver;
 

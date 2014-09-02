@@ -114,6 +114,7 @@ void HYRoomDatabase::Initialize()
 		}
 	}
 
+	PreCalc(1, 1, 1);
 	PreCalc(1, 2, 1);
 	PreCalc(1, 3, 1);
 	PreCalc(1, 3, 2);
@@ -128,18 +129,18 @@ void HYRoomDatabase::Initialize()
 	PreCalc(2, 3, 2);
 	PreCalc(2, 3, 3);
 	PreCalc(2, 4, 1);
-	PreCalc(2, 4, 2);
+	//PreCalc(2, 4, 2);
 	PreCalc(2, 4, 3);
 	PreCalc(2, 4, 4);
-	PreCalc(2, 5, 4);
+	//PreCalc(2, 5, 4);
 	PreCalc(3, 3, 1);
-	PreCalc(3, 3, 2);
-	PreCalc(3, 3, 3);
+	//PreCalc(3, 3, 2);
+	//PreCalc(3, 3, 3);
 	PreCalc(3, 3, 4);
 	PreCalc(3, 3, 5);
-	PreCalc(3, 4, 2);
+	//PreCalc(3, 4, 2);
 	PreCalc(3, 4, 5);
-	PreCalc(3, 5, 4);
+	//PreCalc(3, 5, 4);
 	PreCalc(3, 5, 7);
 	PreCalc(4, 4, 7);
 }

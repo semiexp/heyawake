@@ -3,26 +3,26 @@
 
 #include <algorithm>
 
-HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
+HYField::Status HYField::SolveVirtualRoom(int top_y, int top_x, int end_y, int end_x, int hint)
 {
-	Room &room = rooms[rid];
 	Status ret = NORMAL;
 
-	int room_h = room.end_y - room.top_y, room_w = room.end_x - room.top_x;
+	int room_h = end_y - top_y, room_w = end_x - top_x;
+	if (!HYRoomDatabase::IsAvailable(room_h, room_w, hint)) return NORMAL;
 
 	int black = 0, white = 0;
 
 	for (int i = 0; i < room_h; ++i) {
 		for (int j = 0; j < room_w; ++j) {
-			HYField::Status c_stat = CellStatus(room.top_y + i, room.top_x + j);
+			HYField::Status c_stat = CellStatus(top_y + i, top_x + j);
 
 			if (c_stat == BLACK) black |= 1 << (i * room_w + j);
 			if (c_stat == WHITE) white |= 1 << (i * room_w + j);
 		}
 	}
 
-	std::vector<int> &db = HYRoomDatabase::Fetch(room_h, room_w, room.hint);
-	auto &det = HYRoomDatabase::FetchDetail(room_h, room_w, room.hint);
+	std::vector<int> &db = HYRoomDatabase::Fetch(room_h, room_w, hint);
+	auto &det = HYRoomDatabase::FetchDetail(room_h, room_w, hint);
 
 	int tb_black = (1 << (room_h * room_w)) - 1;
 	int tb_white = tb_black;
@@ -52,7 +52,7 @@ HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
 			bool end_flg = pt < 0;
 			if (pt < 0) pt = ~pt;
 
-			int y = room.top_y + pt / room_w, x = room.top_x + pt % room_w;
+			int y = top_y + pt / room_w, x = top_x + pt % room_w;
 
 			bool aux_flg = false;
 
@@ -61,7 +61,7 @@ HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
 					int y2 = y + dy[j] + dy[(j + 1) % 4], x2 = x + dx[j] + dx[(j + 1) % 4];
 					int bid = BlackUnitId(y2, x2);
 
-					if (Range(y2, x2) && field[Id(y2, x2)].room_id == rid) continue;
+					if (Range(y2, x2) && top_y <= y2 && y2 < end_y && top_x <= x2 && x2 < end_x) continue;
 					if (bid == -1) continue;
 					if (bid == Root(aux_cell)) aux_flg = true;
 					else adjs.push_back(bid);
@@ -97,12 +97,45 @@ HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
 
 	for (int i = 0; i < room_h; i++) {
 		for (int j = 0; j < room_w; j++) {
-			if (tb_black & (1 << (i * room_w + j))) ret |= DetermineBlack(room.top_y + i, room.top_x + j);
-			if (tb_white & (1 << (i * room_w + j))) ret |= DetermineWhite(room.top_y + i, room.top_x + j);
+			if (tb_black & (1 << (i * room_w + j))) ret |= DetermineBlack(top_y + i, top_x + j);
+			if (tb_white & (1 << (i * room_w + j))) ret |= DetermineWhite(top_y + i, top_x + j);
 		}
 	}
 	
 	return ret;
+}
+
+HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
+{
+	Room &room = rooms[rid];
+	if (room.hint == -1) return NORMAL;
+
+	CellCord top_y = 127, top_x = 127, end_y = -1, end_x = -1;
+	CellId rem_hint = room.hint;
+
+	for (int i = room.top_y; i < room.end_y; ++i) {
+		for (int j = room.top_x; j < room.end_x; ++j) {
+			if (CellStatus(i, j) == UNDECIDED) {
+				if (i < top_y) top_y = i;
+				if (end_y < i) end_y = i;
+				if (j < top_x) top_x = j;
+				if (end_x < j) end_x = j;
+			} else if (CellStatus(i, j) == BLACK) { --rem_hint; }
+		}
+	}
+
+	++end_y; ++end_x;
+
+	if (top_y >= end_y || top_x >= end_x) {
+		return (rem_hint == 0) ? NORMAL : INCONSISTENT;
+	}
+
+	for (int i = top_y; i < end_y; ++i) {
+		for (int j = top_x; j < end_x; ++j) {
+			if (CellStatus(i, j) == BLACK) ++rem_hint;
+		}
+	}
+	return SolveVirtualRoom(top_y, top_x, end_y, end_x, rem_hint);
 }
 
 HYField::Status HYField::SolveRoom(RoomId rid)
@@ -110,11 +143,11 @@ HYField::Status HYField::SolveRoom(RoomId rid)
 	Room &room = rooms[rid];
 	Status ret = NORMAL;
 
-	int room_h = room.end_y - room.top_y, room_w = room.end_x - room.top_x;
+	CellCord room_h = room.end_y - room.top_y, room_w = room.end_x - room.top_x;
 
 	// trivial case: number of black cells is already equal to the hint
 
-	if (HYRoomDatabase::IsAvailable(room_h, room_w, room.hint)) ret |= SolveRoomWithDatabase(rid);
+	ret |= SolveRoomWithDatabase(rid);
 
 	CellId n_black = 0;
 
