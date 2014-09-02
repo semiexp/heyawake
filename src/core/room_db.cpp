@@ -132,7 +132,9 @@ void HYRoomDatabase::Initialize()
 	//PreCalc(2, 4, 2);
 	PreCalc(2, 4, 3);
 	PreCalc(2, 4, 4);
+	PreCalc(2, 5, 5);
 	//PreCalc(2, 5, 4);
+	PreCalc(2, 6, 6);
 	PreCalc(3, 3, 1);
 	//PreCalc(3, 3, 2);
 	//PreCalc(3, 3, 3);
