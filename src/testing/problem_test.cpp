@@ -13,4 +13,8 @@ void ProblemTest(int pid)
 	HYSolver::Solve(field);
 	printf("%d\n", (int)field.GetStatus());
 	field.Debug();
+
+	HYSolver::Assume(field);
+	printf("%d\n", (int)field.GetStatus());
+	field.Debug();
 }

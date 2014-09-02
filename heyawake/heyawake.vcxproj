@@ -87,6 +87,7 @@
     <ClInclude Include="..\src\util\util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\core\assumption.cpp" />
     <ClCompile Include="..\src\core\field.cpp" />
     <ClCompile Include="..\src\core\field_loader.cpp" />
     <ClCompile Include="..\src\core\field_room_solver.cpp" />

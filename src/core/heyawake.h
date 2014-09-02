@@ -134,6 +134,7 @@ public:
 	static HYField::Status CheckAllRoom(HYField &field);
 
 	static HYField::Status Solve(HYField &field);
+	static HYField::Status Assume(HYField &field);
 };
 
 class HYRoomDatabase
