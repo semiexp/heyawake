@@ -154,7 +154,7 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 	if (Range(y, x + 1)) ret |= DetermineWhite(y, x + 1);
 
 	Exclude(id);
-	ret |= SolveRoom(field[id].room_id);
+	// ret |= SolveRoom(field[id].room_id);
 
 	return status |= ret;
 }
@@ -174,7 +174,7 @@ HYField::Status HYField::DetermineWhite(CellCord y, CellCord x)
 	if (progress == height * width) { ret |= SOLVED; }
 
 	Exclude(id);
-	ret |= SolveRoom(field[id].room_id);
+	// ret |= SolveRoom(field[id].room_id);
 
 	return status |= ret;
 }
