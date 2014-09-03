@@ -34,7 +34,7 @@ HYField::Status HYSolver::Assume(HYField &field)
 						update = true;
 					}
 
-					if ((f_black.GetStatus() & HYField::INCONSISTENT) && (f_white.GetStatus() & HYField::INCONSISTENT)) {
+					if ((f_white.GetStatus() & HYField::INCONSISTENT)) {
 						ret |= field.DetermineBlack(i, j);
 						update = true;
 					}
