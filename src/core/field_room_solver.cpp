@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-HYField::Status HYField::SolveVirtualRoom(int top_y, int top_x, int end_y, int end_x, int hint)
+HYField::Status HYField::SolveVirtualRoomWithDatabase(int top_y, int top_x, int end_y, int end_x, int hint)
 {
 	Status ret = NORMAL;
 
@@ -105,7 +105,47 @@ HYField::Status HYField::SolveVirtualRoom(int top_y, int top_x, int end_y, int e
 	return ret;
 }
 
-HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
+HYField::Status HYField::SolveVirtualRoom(int top_y, int top_x, int end_y, int end_x, int hint)
+{
+	Status ret = NORMAL;
+
+	ret |= SolveVirtualRoomWithDatabase(top_y, top_x, end_y, end_x, hint);
+
+	CellId n_black = 0, n_undecided = 0;
+
+	for (int i = top_y; i < end_y; ++i) {
+		for (int j = top_x; j < end_x; ++j) {
+			if (CellStatus(i, j) == BLACK) ++n_black;
+			if (CellStatus(i, j) == UNDECIDED) ++n_undecided;
+		}
+	}
+
+	if (n_black == hint) {
+		for (int i = top_y; i < end_y; ++i) {
+			for (int j = top_x; j < end_x; ++j) {
+				if (CellStatus(i, j) == UNDECIDED) ret |= DetermineWhite(i, j);
+			}
+		}
+	}
+
+	if (hint - n_black > n_undecided) {
+		ret |= INCONSISTENT;
+	}
+
+	if (hint - n_black == n_undecided) {
+		for (int i = top_y; i < end_y; ++i) {
+			for (int j = top_x; j < end_x; ++j) {
+				if (CellStatus(i, j) == UNDECIDED) {
+					ret |= DetermineBlack(i, j);
+				}
+			}
+		}
+	}
+
+	return status |= ret;
+}
+
+HYField::Status HYField::SolveRoom(RoomId rid)
 {
 	Room &room = rooms[rid];
 	if (room.hint == -1) return NORMAL;
@@ -135,65 +175,8 @@ HYField::Status HYField::SolveRoomWithDatabase(RoomId rid)
 			if (CellStatus(i, j) == BLACK) ++rem_hint;
 		}
 	}
+
 	return SolveVirtualRoom(top_y, top_x, end_y, end_x, rem_hint);
-}
-
-HYField::Status HYField::SolveRoom(RoomId rid)
-{
-	Room &room = rooms[rid];
-	Status ret = NORMAL;
-
-	CellCord room_h = room.end_y - room.top_y, room_w = room.end_x - room.top_x;
-
-	// trivial case: number of black cells is already equal to the hint
-
-	ret |= SolveRoomWithDatabase(rid);
-
-	CellId n_black = 0;
-
-	for (int i = room.top_y; i < room.end_y; ++i) {
-		for (int j = room.top_x; j < room.end_x; ++j) {
-			if (CellStatus(i, j) == BLACK) ++n_black;
-		}
-	}
-
-	if (n_black == room.hint) {
-		for (int i = room.top_y; i < room.end_y; ++i) {
-			for (int j = room.top_x; j < room.end_x; ++j) {
-				if (CellStatus(i, j) == UNDECIDED) ret |= DetermineWhite(i, j);
-			}
-		}
-	}
-
-	// 2 * 2 room
-
-	/*
-	if (room_h == 2 && room_w == 2 && room.hint == 2) {
-		int id1, id2;
-
-		id1 = BlackUnitId(room.top_y - 1, room.top_x - 1);
-		id2 = BlackUnitId(room.top_y + 2, room.top_x + 2);
-
-		if ((id1 != -1 && id2 != -1 && Root(id1) == Root(id2)) || CellStatus(room.top_y, room.top_x) == WHITE || CellStatus(room.top_y + 1, room.top_x + 1) == WHITE) {
-			ret |= DetermineWhite(room.top_y, room.top_x);
-			ret |= DetermineBlack(room.top_y, room.top_x + 1);
-			ret |= DetermineBlack(room.top_y + 1, room.top_x);
-			ret |= DetermineWhite(room.top_y + 1, room.top_x + 1);
-		}
-
-		id1 = BlackUnitId(room.top_y + 2, room.top_x - 1);
-		id2 = BlackUnitId(room.top_y - 1, room.top_x + 2);
-
-		if ((id1 != -1 && id2 != -1 && Root(id1) == Root(id2)) || CellStatus(room.top_y + 1, room.top_x) == WHITE || CellStatus(room.top_y, room.top_x + 1) == WHITE) {
-			ret |= DetermineBlack(room.top_y, room.top_x);
-			ret |= DetermineWhite(room.top_y, room.top_x + 1);
-			ret |= DetermineWhite(room.top_y + 1, room.top_x);
-			ret |= DetermineBlack(room.top_y + 1, room.top_x + 1);
-		}
-	}
-	*/
-
-	return status |= ret;
 }
 
 HYField::Status HYField::SolveTrivialRoom(RoomId rid)

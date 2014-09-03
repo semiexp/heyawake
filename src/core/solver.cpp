@@ -13,7 +13,7 @@ HYField::Status HYSolver::Solve(HYField &field)
 		ret |= CheckAllRoom(field);
 	} while (ret == HYField::NORMAL && cur_progress != field.GetProgress());
 
-	return ret;
+	return field.status |= ret;
 }
 
 HYField::Status HYSolver::AssureConnectivity(HYField &field)
@@ -30,7 +30,7 @@ HYField::Status HYSolver::AssureConnectivity(HYField &field)
 		}
 	}
 
-	return ret;
+	return field.status |= ret;
 }
 
 HYField::Status HYSolver::CheckAllRoom(HYField &field)
@@ -41,5 +41,5 @@ HYField::Status HYSolver::CheckAllRoom(HYField &field)
 		ret |= field.SolveRoom(i);
 	}
 
-	return ret;
+	return field.status |= ret;
 }
