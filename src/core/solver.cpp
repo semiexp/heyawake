@@ -4,42 +4,37 @@
 HYField::Status HYSolver::Solve(HYField &field)
 {
 	int cur_progress;
-	HYField::Status ret = HYField::NORMAL;
 
 	do {
 		cur_progress = field.GetProgress();
 
-		ret |= AssureConnectivity(field);
-		ret |= CheckAllRoom(field);
-	} while (ret == HYField::NORMAL && cur_progress != field.GetProgress());
+		AssureConnectivity(field);
+		CheckAllRoom(field);
+	} while (field.status == HYField::NORMAL && cur_progress != field.GetProgress());
 
-	return field.status |= ret;
+	return field.status;
 }
 
 HYField::Status HYSolver::AssureConnectivity(HYField &field)
 {
 	int height = field.height, width = field.width;
 
-	HYField::Status ret = HYField::NORMAL;
-
 	for (int i = 0; i < height; ++i) {
 		for (int j = 0; j < width; ++j) {
 			if (field.CellStatus(i, j) == HYField::UNDECIDED) {
-				ret |= field.AssureConnectivity(i, j);
+				field.AssureConnectivity(i, j);
 			}
 		}
 	}
 
-	return field.status |= ret;
+	return field.status;
 }
 
 HYField::Status HYSolver::CheckAllRoom(HYField &field)
 {
-	HYField::Status ret = HYField::NORMAL;
-
 	for (int i = 0; i < field.n_rooms; i++) {
-		ret |= field.SolveRoom(i);
+		field.SolveRoom(i);
 	}
 
-	return field.status |= ret;
+	return field.status;
 }

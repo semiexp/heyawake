@@ -72,8 +72,6 @@ void HYField::Join(CellId p, CellId q)
 
 HYField::Status HYField::AssureConnectivity(CellCord y, CellCord x)
 {
-	Status ret = NORMAL;
-
 	int ids[5];
 
 	for (int i = 0; i < 4; i++) {
@@ -90,18 +88,18 @@ HYField::Status HYField::AssureConnectivity(CellCord y, CellCord x)
 		if (Range(y2, x2)) {
 			if (ids[i] != -1 && ids[i + 1] != -1) {
 				if (Root(ids[i]) == Root(ids[i + 1])) {
-					ret |= DetermineWhite(y, x);
+					DetermineWhite(y, x);
 				}
 			}
 		}
 	}
 
 	if (0 < y && y < height - 1 && 0 < x && x < width - 1) {
-		if (ids[0] != -1 && ids[2] != -1 && Root(ids[0]) == Root(ids[2])) ret |= DetermineWhite(y, x);
-		if (ids[1] != -1 && ids[3] != -1 && Root(ids[1]) == Root(ids[3])) ret |= DetermineWhite(y, x);
+		if (ids[0] != -1 && ids[2] != -1 && Root(ids[0]) == Root(ids[2])) DetermineWhite(y, x);
+		if (ids[1] != -1 && ids[3] != -1 && Root(ids[1]) == Root(ids[3])) DetermineWhite(y, x);
 	}
 
-	return ret;
+	return status;
 }
 
 HYField::Status HYField::ExcludeFromRSet(RSetId sid, CellId cid)
@@ -115,12 +113,11 @@ HYField::Status HYField::ExcludeFromRSet(RSetId sid, CellId cid)
 
 HYField::Status HYField::Exclude(CellId cid)
 {
-	Status ret = NORMAL;
 	for (int i = 0; i < field[cid].n_conds; ++i) {
-		ret |= ExcludeFromRSet(field[cid].cond[i], cid);
+		ExcludeFromRSet(field[cid].cond[i], cid);
 	}
 
-	return ret;
+	return status;
 }
 
 HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
@@ -128,9 +125,7 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 	CellId id = Id(y, x);
 
 	if (field[id].stat == WHITE) return status |= INCONSISTENT;
-	if (field[id].stat == BLACK) return NORMAL;
-
-	Status ret = NORMAL;
+	if (field[id].stat == BLACK) return status;
 
 	AssureConnectivity(y, x);
 
@@ -139,7 +134,7 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 	field[id].stat = BLACK;
 	++progress;
 
-	if (progress == height * width) { ret |= SOLVED; }
+	if (progress == height * width) { status |= SOLVED; }
 
 	for (int i = 0; i < 4; ++i) {
 		int y2 = y + dy[i] + dy[(i + 1) % 4], x2 = x + dx[i] + dx[(i + 1) % 4];
@@ -148,15 +143,15 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 		if (id2 != -1) Join(id, id2);
 	}
 
-	if (Range(y - 1, x)) ret |= DetermineWhite(y - 1, x);
-	if (Range(y + 1, x)) ret |= DetermineWhite(y + 1, x);
-	if (Range(y, x - 1)) ret |= DetermineWhite(y, x - 1);
-	if (Range(y, x + 1)) ret |= DetermineWhite(y, x + 1);
+	if (Range(y - 1, x)) DetermineWhite(y - 1, x);
+	if (Range(y + 1, x)) DetermineWhite(y + 1, x);
+	if (Range(y, x - 1)) DetermineWhite(y, x - 1);
+	if (Range(y, x + 1)) DetermineWhite(y, x + 1);
 
 	Exclude(id);
 	// ret |= SolveRoom(field[id].room_id);
 
-	return status |= ret;
+	return status;
 }
 
 HYField::Status HYField::DetermineWhite(CellCord y, CellCord x)
@@ -164,19 +159,16 @@ HYField::Status HYField::DetermineWhite(CellCord y, CellCord x)
 	CellId id = Id(y, x);
 
 	if (field[id].stat == BLACK) return status |= INCONSISTENT;
-	if (field[id].stat == WHITE) return NORMAL;
-
-	Status ret = NORMAL;
+	if (field[id].stat == WHITE) return status;
 
 	field[id].stat = WHITE;
 	++progress;
 
-	if (progress == height * width) { ret |= SOLVED; }
+	if (progress == height * width) { status |= SOLVED; }
 
 	Exclude(id);
-	// ret |= SolveRoom(field[id].room_id);
 
-	return status |= ret;
+	return status;
 }
 
 HYField::Status HYField::SolveRestrictedSet(RSetId sid)
@@ -187,7 +179,7 @@ HYField::Status HYField::SolveRestrictedSet(RSetId sid)
 		return DetermineBlack(cid / width, cid % width);
 	}
 
-	return NORMAL;
+	return status;
 }
 
 void HYField::Debug()

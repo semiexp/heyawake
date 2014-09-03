@@ -5,10 +5,8 @@
 
 HYField::Status HYField::SolveVirtualRoomWithDatabase(int top_y, int top_x, int end_y, int end_x, int hint)
 {
-	Status ret = NORMAL;
-
 	int room_h = end_y - top_y, room_w = end_x - top_x;
-	if (!HYRoomDatabase::IsAvailable(room_h, room_w, hint)) return NORMAL;
+	if (!HYRoomDatabase::IsAvailable(room_h, room_w, hint)) return status;
 
 	int black = 0, white = 0;
 
@@ -37,7 +35,7 @@ HYField::Status HYField::SolveVirtualRoomWithDatabase(int top_y, int top_x, int 
 		++n_cand;
 	}
 
-	if (n_cand > 10) return NORMAL;
+	if (n_cand > 10) return status;
 
 	for (int i = 0; i < db.size(); i++) {
 		int bit = db[i];
@@ -97,19 +95,17 @@ HYField::Status HYField::SolveVirtualRoomWithDatabase(int top_y, int top_x, int 
 
 	for (int i = 0; i < room_h; i++) {
 		for (int j = 0; j < room_w; j++) {
-			if (tb_black & (1 << (i * room_w + j))) ret |= DetermineBlack(top_y + i, top_x + j);
-			if (tb_white & (1 << (i * room_w + j))) ret |= DetermineWhite(top_y + i, top_x + j);
+			if (tb_black & (1 << (i * room_w + j))) DetermineBlack(top_y + i, top_x + j);
+			if (tb_white & (1 << (i * room_w + j))) DetermineWhite(top_y + i, top_x + j);
 		}
 	}
 	
-	return ret;
+	return status;
 }
 
 HYField::Status HYField::SolveVirtualRoom(int top_y, int top_x, int end_y, int end_x, int hint)
 {
-	Status ret = NORMAL;
-
-	ret |= SolveVirtualRoomWithDatabase(top_y, top_x, end_y, end_x, hint);
+	SolveVirtualRoomWithDatabase(top_y, top_x, end_y, end_x, hint);
 
 	CellId n_black = 0, n_undecided = 0;
 
@@ -123,26 +119,24 @@ HYField::Status HYField::SolveVirtualRoom(int top_y, int top_x, int end_y, int e
 	if (n_black == hint) {
 		for (int i = top_y; i < end_y; ++i) {
 			for (int j = top_x; j < end_x; ++j) {
-				if (CellStatus(i, j) == UNDECIDED) ret |= DetermineWhite(i, j);
+				if (CellStatus(i, j) == UNDECIDED) DetermineWhite(i, j);
 			}
 		}
 	}
 
-	if (hint - n_black > n_undecided) {
-		ret |= INCONSISTENT;
-	}
+	if (hint - n_black > n_undecided) status |= INCONSISTENT;
 
 	if (hint - n_black == n_undecided) {
 		for (int i = top_y; i < end_y; ++i) {
 			for (int j = top_x; j < end_x; ++j) {
 				if (CellStatus(i, j) == UNDECIDED) {
-					ret |= DetermineBlack(i, j);
+					DetermineBlack(i, j);
 				}
 			}
 		}
 	}
 
-	return status |= ret;
+	return status;
 }
 
 HYField::Status HYField::SolveRoom(RoomId rid)
@@ -167,7 +161,7 @@ HYField::Status HYField::SolveRoom(RoomId rid)
 	++end_y; ++end_x;
 
 	if (top_y >= end_y || top_x >= end_x) {
-		return (rem_hint == 0) ? NORMAL : INCONSISTENT;
+		return status |= (rem_hint == 0) ? NORMAL : INCONSISTENT;
 	}
 
 	for (int i = top_y; i < end_y; ++i) {
@@ -182,7 +176,6 @@ HYField::Status HYField::SolveRoom(RoomId rid)
 HYField::Status HYField::SolveTrivialRoom(RoomId rid)
 {
 	Room &room = rooms[rid];
-	Status ret = NORMAL;
 
 	int room_h = room.end_y - room.top_y, room_w = room.end_x - room.top_x;
 
@@ -190,35 +183,35 @@ HYField::Status HYField::SolveTrivialRoom(RoomId rid)
 		// hint == 0 (trivial)
 		for (int i = room.top_y; i < room.end_y; i++) {
 			for (int j = room.top_x; j < room.end_x; j++) {
-				ret |= DetermineWhite(i, j);
+				DetermineWhite(i, j);
 			}
 		}
 	}
 
 	if (room_h == 1 && room_w == room.hint * 2 - 1) {
 		for (int i = 0; i < room_w; i++) {
-			if (i % 2 == 0) ret |= DetermineBlack(room.top_y, room.top_x + i);
-			else ret |= DetermineWhite(room.top_y, room.top_x + i);
+			if (i % 2 == 0) DetermineBlack(room.top_y, room.top_x + i);
+			else DetermineWhite(room.top_y, room.top_x + i);
 		}
 	}
 
 	if (room_w == 1 && room_h == room.hint * 2 - 1) {
 		for (int i = 0; i < room_h; i++) {
-			if (i % 2 == 0) ret |= DetermineBlack(room.top_y + i, room.top_x);
-			else ret |= DetermineWhite(room.top_y + i, room.top_x);
+			if (i % 2 == 0) DetermineBlack(room.top_y + i, room.top_x);
+			else DetermineWhite(room.top_y + i, room.top_x);
 		}
 	}
 
 	if (room_h == 3 && room_w == 3 && room.hint == 5) {
 		for (int i = 0; i < 3; ++i) {
 			for (int j = 0; j < 3; ++j) {
-				if ((i + j) % 2 == 0) ret |= DetermineBlack(room.top_y + i, room.top_x + j);
-				else ret |= DetermineWhite(room.top_y + i, room.top_x + j);
+				if ((i + j) % 2 == 0) DetermineBlack(room.top_y + i, room.top_x + j);
+				else DetermineWhite(room.top_y + i, room.top_x + j);
 			}
 		}
 	}
 
-	ret |= SolveRoom(rid);
+	SolveRoom(rid);
 
-	return ret;
+	return status;
 }
