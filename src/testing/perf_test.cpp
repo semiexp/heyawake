@@ -17,6 +17,9 @@ void PerformanceTest(int pid, int rec)
 
 		HYField field(prob);
 		HYSolver::Solve(field);
+		HYSolver::Assume(field);
+
+		if (field.GetStatus() != HYField::SOLVED) return;
 	}
 
 	end = clock();
