@@ -2,6 +2,7 @@
 #include "heyawake.h"
 
 #include <cstdio>
+#include <cstdlib>
 #include <algorithm>
 
 int HYField::dx[] = { -1, 0, 1, 0 };
@@ -44,7 +45,7 @@ HYField::HYField(const HYField &src)
 	rsets = (RestrictedSet*)(pool + ((char*)src.rsets - src.pool));
 	rooms = (Room*)(pool + ((char*)src.rooms - src.pool));
 
-	for (int i = 0; i < sz_pool; i++) pool[i] = src.pool[i];
+	memcpy(pool, src.pool, sz_pool);
 
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; j++) {
