@@ -74,5 +74,8 @@
     <ClCompile Include="..\src\core\connection_manager.cpp">
       <Filter>ソース ファイル\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\pseudo_connection.cpp">
+      <Filter>ソース ファイル\core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

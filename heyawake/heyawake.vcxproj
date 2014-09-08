@@ -91,6 +91,7 @@
     <ClCompile Include="..\src\core\field.cpp" />
     <ClCompile Include="..\src\core\field_loader.cpp" />
     <ClCompile Include="..\src\core\field_room_solver.cpp" />
+    <ClCompile Include="..\src\core\pseudo_connection.cpp" />
     <ClCompile Include="..\src\core\room_db.cpp" />
     <ClCompile Include="..\src\core\solver.cpp" />
     <ClCompile Include="..\src\core\connection_manager.cpp" />
