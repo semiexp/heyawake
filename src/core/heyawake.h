@@ -25,6 +25,8 @@ public:
 	}
 };
 
+class HYConnectionManager;
+
 class HYField
 {
 	struct Cell;
@@ -86,6 +88,7 @@ class HYField
 	CellId Id(CellCord y, CellCord x) { return y * width + x; }
 	bool Range(CellCord y, CellCord x) { return 0 <= y && y < height && 0 <= x && x < width; }
 	Status CellStatus(CellCord y, CellCord x) { return field[Id(y, x)].stat; }
+	RoomId CellRoomId(CellCord y, CellCord x) { return field[Id(y, x)].room_id; }
 	CellId BlackUnitId(CellCord y, CellCord x) { return Range(y, x) ? (CellStatus(y, x) == BLACK ? Root(Id(y, x)) : -1) : Root(aux_cell); }
 
 	CellId Root(CellId p) { return field[p].unit_root < 0 ? p : (field[p].unit_root = Root(field[p].unit_root)); }
@@ -102,6 +105,7 @@ class HYField
 	Status SolveTrivialRoom(RoomId rid);
 
 	friend class HYSolver;
+	friend class HYConnectionManager;
 
 public:
 	static const Status UNDECIDED = 0;
@@ -128,11 +132,33 @@ public:
 	void Debug();
 };
 
+class HYConnectionManager
+{
+	typedef HYField::CellCord CellCord;
+	typedef HYField::CellId CellId;
+
+	CellId *unit_root;
+	CellId aux;
+	CellCord height, width;
+
+public:
+	HYConnectionManager() : unit_root(nullptr), aux(-1), height(-1), width(-1) {}
+	HYConnectionManager(CellCord height, CellCord width, CellId *space);
+
+	bool Range(CellCord y, CellCord x) { return 0 <= y && y < height && 0 <= x && x < width; }
+	CellId Id(CellCord y, CellCord x) { return y * width + x; }
+
+	CellId Root(CellId p) { return unit_root[p] < 0 ? p : (unit_root[p] = Root(unit_root[p])); }
+	void Join(CellId p, CellId q);
+	bool CheckValidity(CellCord y, CellCord x);
+};
+
 class HYSolver
 {
 public:
 	static HYField::Status AssureConnectivity(HYField &field);
 	static HYField::Status CheckAllRoom(HYField &field);
+	static HYField::Status CheckPseudoConnection(HYField &field);
 
 	static HYField::Status Solve(HYField &field);
 	static HYField::Status Assume(HYField &field);
