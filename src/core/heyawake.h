@@ -113,6 +113,7 @@ class HYField
 	Status CellStatus(CellCord y, CellCord x) { return field[Id(y, x)].stat; }
 	RoomId CellRoomId(CellCord y, CellCord x) { return field[Id(y, x)].room_id; }
 	CellId BlackUnitId(CellCord y, CellCord x) { return Range(y, x) ? (CellStatus(y, x) == BLACK ? Root(Id(y, x)) : -1) : Root(aux_cell); }
+	bool IsBlackOrOutOfRange(CellCord y, CellCord x) { return !Range(y, x) || CellStatus(y, x) == BLACK; }
 
 	CellId Root(CellId p) { return conm.Root(p); }
 	Status AssureConnectivity(CellCord y, CellCord x);

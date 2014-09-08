@@ -13,19 +13,19 @@ HYField::Status HYSolver::CheckPseudoConnection(HYField &field)
 
 	for (int i = 0; i < height * width; ++i) con_related[i] = false;
 
-	for (int i = 1; i < height - 1; ++i) {
-		for (int j = 1; j < width - 1; ++j) {
-			if (field.CellStatus(i - 1, j) == HYField::BLACK && field.CellStatus(i + 1, j) == HYField::BLACK) {
+	for (int i = 0; i < height; ++i) {
+		for (int j = 0; j < width; ++j) {
+			if (1 <= j && j < width - 1 && field.IsBlackOrOutOfRange(i - 1, j) && field.IsBlackOrOutOfRange(i + 1, j)) {
 				if (field.CellRoomId(i, j) != field.CellRoomId(i, j - 1) && field.CellRoomId(i, j) != field.CellRoomId(i, j + 1)) {
 					con_related[field.Id(i, j - 1)] = con_related[field.Id(i, j + 1)] = true;
-					conm.Join(field.Id(i - 1, j), field.Id(i + 1, j));
+					conm.Join(field.BlackUnitId(i - 1, j), field.BlackUnitId(i + 1, j));
 				}
 			}
 
-			if (field.CellStatus(i, j - 1) == HYField::BLACK && field.CellStatus(i, j + 1) == HYField::BLACK) {
+			if (1 <= i && i < height - 1 && field.IsBlackOrOutOfRange(i, j - 1) && field.IsBlackOrOutOfRange(i, j + 1)) {
 				if (field.CellRoomId(i, j) != field.CellRoomId(i - 1, j) && field.CellRoomId(i, j) != field.CellRoomId(i + 1, j)) {
 					con_related[field.Id(i - 1, j)] = con_related[field.Id(i + 1, j)] = true;
-					conm.Join(field.Id(i, j - 1), field.Id(i, j + 1));
+					conm.Join(field.BlackUnitId(i, j - 1), field.BlackUnitId(i, j + 1));
 				}
 			}
 		}
