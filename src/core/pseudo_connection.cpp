@@ -40,5 +40,9 @@ HYField::Status HYSolver::CheckPseudoConnection(HYField &field)
 			}
 		}
 	}
+
+	delete[] space;
+	delete[] con_related;
+
 	return field.GetStatus();
 }
