@@ -44,7 +44,7 @@ HYField::HYField(const HYField &src)
 	field = (Cell*)(pool + ((char*)src.field - src.pool));
 	rsets = (RestrictedSet*)(pool + ((char*)src.rsets - src.pool));
 	rooms = (Room*)(pool + ((char*)src.rooms - src.pool));
-
+	conm = HYConnectionManager(height, width, (CellId*)(pool + ((char*)src.conm.GetPointer() - src.pool)));
 	memcpy(pool, src.pool, sz_pool);
 
 	for (int i = 0; i < height; i++) {
@@ -61,43 +61,10 @@ HYField::~HYField()
 	delete[] pool;
 }
 
-void HYField::Join(CellId p, CellId q)
-{
-	p = Root(p); q = Root(q);
-
-	if (p == q) return;
-
-	field[p].unit_root += field[q].unit_root;
-	field[q].unit_root = p;
-}
-
 HYField::Status HYField::AssureConnectivity(CellCord y, CellCord x)
 {
-	int ids[5];
-
-	for (int i = 0; i < 4; i++) {
-		int y2 = y + dy[i] + dy[(i+3)%4], x2 = x + dx[i] + dx[(i+3)%4];
-
-		ids[i] = BlackUnitId(y2, x2);
-	}
-
-	ids[4] = ids[0];
-
-	for (int i = 0; i < 4; i++) {
-		int y2 = y + dy[i], x2 = x + dx[i];
-
-		if (Range(y2, x2)) {
-			if (ids[i] != -1 && ids[i + 1] != -1) {
-				if (Root(ids[i]) == Root(ids[i + 1])) {
-					DetermineWhite(y, x);
-				}
-			}
-		}
-	}
-
-	if (0 < y && y < height - 1 && 0 < x && x < width - 1) {
-		if (ids[0] != -1 && ids[2] != -1 && Root(ids[0]) == Root(ids[2])) DetermineWhite(y, x);
-		if (ids[1] != -1 && ids[3] != -1 && Root(ids[1]) == Root(ids[3])) DetermineWhite(y, x);
+	if (!conm.CheckValidity(y, x)) {
+		return DetermineWhite(y, x);
 	}
 
 	return status;
@@ -141,7 +108,7 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 		int y2 = y + dy[i] + dy[(i + 1) % 4], x2 = x + dx[i] + dx[(i + 1) % 4];
 
 		int id2 = BlackUnitId(y2, x2);
-		if (id2 != -1) Join(id, id2);
+		if (id2 != -1) conm.Join(id, id2);
 	}
 
 	if (Range(y - 1, x)) DetermineWhite(y - 1, x);

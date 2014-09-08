@@ -8,6 +8,16 @@ HYConnectionManager::HYConnectionManager(CellCord height, CellCord width, CellId
 	for (int i = 0; i <= height * width; ++i) space[i] = -1;
 }
 
+void HYConnectionManager::Join(CellId p, CellId q)
+{
+	p = Root(p); q = Root(q);
+
+	if (p == q) return;
+
+	unit_root[p] += unit_root[q];
+	unit_root[q] = p;
+}
+
 bool HYConnectionManager::CheckValidity(CellCord y, CellCord x)
 {
 	int ids[5];

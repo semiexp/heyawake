@@ -25,20 +25,20 @@ HYField::Status HYField::Load(HYProblem &prob)
 
 	n_rooms = prob.hint.size();
 
-	sz_pool = sizeof(Cell) * (height * width + 1) + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms + sizeof(RSetId) * nSetCells;
+	sz_pool = sizeof(Cell) * (height * width) + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms + sizeof(RSetId) * nSetCells + sizeof(CellId) * (height * width + 1);
 	pool = new char[sz_pool];
 
 	field = (Cell*)pool;
-	rsets = (RestrictedSet*)(pool + sizeof(Cell) * (height * width + 1));
-	rooms = (Room*)(pool + sizeof(Cell) * (height * width + 1) + sizeof(RestrictedSet) * n_rsets);
-	RSetId *rset_holder = (RSetId*)(pool + sizeof(Cell) * (height * width + 1) + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms);
+	rsets = (RestrictedSet*)(pool + sizeof(Cell) * height * width);
+	rooms = (Room*)(pool + sizeof(Cell) * (height * width) + sizeof(RestrictedSet) * n_rsets);
+	RSetId *rset_holder = (RSetId*)(pool + sizeof(Cell) * height * width + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms);
+	conm = HYConnectionManager(height, width, (CellId*)(pool + (sizeof(Cell) * (height * width) + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms + sizeof(RSetId) * nSetCells)));
 
 	aux_cell = height * width;
 
-	for (int i = 0; i <= aux_cell; i++) {
+	for (int i = 0; i < height * width; i++) {
 		field[i].stat = NORMAL;
 		field[i].n_conds = 0;
-		field[i].unit_root = -1;
 	}
 
 

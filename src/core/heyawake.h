@@ -25,7 +25,28 @@ public:
 	}
 };
 
-class HYConnectionManager;
+class HYConnectionManager
+{
+	typedef int CellCord;
+	typedef int CellId;
+
+	CellId *unit_root;
+	CellId aux;
+	CellCord height, width;
+
+public:
+	HYConnectionManager() : unit_root(nullptr), aux(-1), height(-1), width(-1) {}
+	HYConnectionManager(CellCord height, CellCord width, CellId *space);
+
+	CellId *GetPointer() const { return unit_root; }
+
+	bool Range(CellCord y, CellCord x) { return 0 <= y && y < height && 0 <= x && x < width; }
+	CellId Id(CellCord y, CellCord x) { return y * width + x; }
+	
+	CellId Root(CellId p) { return unit_root[p] < 0 ? p : (unit_root[p] = Root(unit_root[p])); }
+	void Join(CellId p, CellId q);
+	bool CheckValidity(CellCord y, CellCord x);
+};
 
 class HYField
 {
@@ -48,7 +69,7 @@ class HYField
 	{
 		Status stat;
 
-		RoomId room_id, unit_root;
+		RoomId room_id;
 		RSetId n_conds, *cond;
 	};
 
@@ -70,6 +91,7 @@ class HYField
 		bool CellInclude(CellCord y, CellCord x) { return top_y <= y && y < end_y && top_x <= x && x < end_x; }
 	};
 
+	HYConnectionManager conm;
 	CellCord height, width;
 	RSetId n_rsets;
 	RoomId n_rooms;
@@ -91,8 +113,7 @@ class HYField
 	RoomId CellRoomId(CellCord y, CellCord x) { return field[Id(y, x)].room_id; }
 	CellId BlackUnitId(CellCord y, CellCord x) { return Range(y, x) ? (CellStatus(y, x) == BLACK ? Root(Id(y, x)) : -1) : Root(aux_cell); }
 
-	CellId Root(CellId p) { return field[p].unit_root < 0 ? p : (field[p].unit_root = Root(field[p].unit_root)); }
-	void Join(CellId p, CellId q);
+	CellId Root(CellId p) { return conm.Root(p); }
 	Status AssureConnectivity(CellCord y, CellCord x);
 
 	Status Exclude(CellId cid);
@@ -130,27 +151,6 @@ public:
 	CellId GetProgress() { return progress; }
 
 	void Debug();
-};
-
-class HYConnectionManager
-{
-	typedef HYField::CellCord CellCord;
-	typedef HYField::CellId CellId;
-
-	CellId *unit_root;
-	CellId aux;
-	CellCord height, width;
-
-public:
-	HYConnectionManager() : unit_root(nullptr), aux(-1), height(-1), width(-1) {}
-	HYConnectionManager(CellCord height, CellCord width, CellId *space);
-
-	bool Range(CellCord y, CellCord x) { return 0 <= y && y < height && 0 <= x && x < width; }
-	CellId Id(CellCord y, CellCord x) { return y * width + x; }
-
-	CellId Root(CellId p) { return unit_root[p] < 0 ? p : (unit_root[p] = Root(unit_root[p])); }
-	void Join(CellId p, CellId q);
-	bool CheckValidity(CellCord y, CellCord x);
 };
 
 class HYSolver
