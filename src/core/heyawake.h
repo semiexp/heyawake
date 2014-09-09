@@ -37,7 +37,7 @@ class HYConnectionManager
 public:
 	HYConnectionManager() : unit_root(nullptr), aux(-1), height(-1), width(-1) {}
 	HYConnectionManager(CellCord height, CellCord width, CellId *space);
-	void Load(const HYConnectionManager &src) { memcpy(unit_root, src.unit_root, sizeof(CellId) * (height + width + 1)); }
+	void Load(const HYConnectionManager &src) { memcpy(unit_root, src.unit_root, sizeof(CellId) * (height * width + 1)); }
 
 	CellId *GetPointer() const { return unit_root; }
 
