@@ -99,6 +99,7 @@
     <ClCompile Include="..\src\testing\perf_test.cpp" />
     <ClCompile Include="..\src\testing\problems.cpp" />
     <ClCompile Include="..\src\testing\problem_test.cpp" />
+    <ClCompile Include="..\src\testing\pseudo_connection_test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
