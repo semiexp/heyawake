@@ -6,8 +6,8 @@
 int main(int argc, char* argv[])
 {
 	//ProblemTest(7);
-	//PerformanceTest(7, 100);
-	PseudoConnectionTest();
+	PerformanceTest(7, 100);
+	//PseudoConnectionTest();
 
 	return 0;
 }

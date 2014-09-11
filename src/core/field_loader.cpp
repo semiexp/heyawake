@@ -46,6 +46,7 @@ HYField::Status HYField::Load(HYProblem &prob)
 		field[i].n_conds = 0;
 	}
 
+	std::fill(rel_pseudo_con, rel_pseudo_con + (height * width + 1), false);
 
 	RSetId rset_id = 0;
 	int rset_cell_id = 0;
