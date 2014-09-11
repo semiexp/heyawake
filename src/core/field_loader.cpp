@@ -1,5 +1,6 @@
 
 #include "heyawake.h"
+#include "../util/util.h"
 
 HYField::Status HYField::Load(HYProblem &prob)
 {
@@ -26,13 +27,15 @@ HYField::Status HYField::Load(HYProblem &prob)
 	n_rooms = prob.hint.size();
 
 	sz_pool = sizeof(Cell) * (height * width) + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms + sizeof(RSetId) * nSetCells + sizeof(CellId) * (height * width + 1);
-	pool = new char[sz_pool];
 
-	field = (Cell*)pool;
-	rsets = (RestrictedSet*)(pool + sizeof(Cell) * height * width);
-	rooms = (Room*)(pool + sizeof(Cell) * (height * width) + sizeof(RestrictedSet) * n_rsets);
-	RSetId *rset_holder = (RSetId*)(pool + sizeof(Cell) * height * width + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms);
-	conm = HYConnectionManager(height, width, (CellId*)(pool + (sizeof(Cell) * (height * width) + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms + sizeof(RSetId) * nSetCells)));
+	pool = new char[sz_pool];
+	TrivialAllocator ta(pool);
+
+	field = (Cell*)ta.allocate(sizeof(Cell) * (height * width));
+	rsets = (RestrictedSet*)ta.allocate(sizeof(RestrictedSet) * n_rsets);
+	rooms = (Room*)ta.allocate(sizeof(Room) * n_rooms);
+	RSetId *rset_holder = (RSetId*)ta.allocate(sizeof(RSetId) * nSetCells);
+	conm = HYConnectionManager(height, width, (CellId*) ta.allocate(sizeof(CellId) * (height * width + 1)));
 
 	aux_cell = height * width;
 
