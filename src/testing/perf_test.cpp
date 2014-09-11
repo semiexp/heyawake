@@ -19,7 +19,10 @@ void PerformanceTest(int pid, int rec)
 		HYSolver::Solve(field);
 		HYSolver::Assume(field);
 
-		if (field.GetStatus() != HYField::SOLVED) return;
+		if (field.GetStatus() != HYField::SOLVED) {
+			printf("Failed: %d\n", field.GetStatus());
+			return;
+		}
 	}
 
 	end = clock();

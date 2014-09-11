@@ -100,7 +100,8 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 {
 	CellId id = Id(y, x);
 
-	if (field[id].stat == WHITE) return status |= INCONSISTENT;
+	if (field[id].stat == WHITE) 
+		return status |= INCONSISTENT;
 	if (field[id].stat == BLACK) return status;
 
 	AssureConnectivity(y, x);

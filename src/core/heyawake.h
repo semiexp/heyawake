@@ -114,10 +114,11 @@ class HYField
 	bool Range(CellCord y, CellCord x) { return 0 <= y && y < height && 0 <= x && x < width; }
 	Status CellStatus(CellCord y, CellCord x) { return field[Id(y, x)].stat; }
 	RoomId CellRoomId(CellCord y, CellCord x) { return field[Id(y, x)].room_id; }
-	CellId BlackUnitId(CellCord y, CellCord x) { return Range(y, x) ? (CellStatus(y, x) == BLACK ? Root(Id(y, x)) : -1) : Root(aux_cell); }
+	CellId BlackUnitId(CellCord y, CellCord x) { return Range(y, x) ? (CellStatus(y, x) == BLACK ? Id(y, x) : -1) : aux_cell; }
 	bool IsBlackOrOutOfRange(CellCord y, CellCord x) { return !Range(y, x) || CellStatus(y, x) == BLACK; }
 
 	CellId Root(CellId p) { return conm.Root(p); }
+	CellId PseudoRoot(CellId p) { return conm_ps.Root(p); }
 	Status AssureConnectivity(CellCord y, CellCord x);
 
 	void CheckPseudoConnection(CellCord y, CellCord x);

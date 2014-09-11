@@ -37,6 +37,15 @@ HYField::Status HYField::SolveVirtualRoomWithDatabase(int top_y, int top_x, int 
 
 	if (n_cand > 10) return status;
 
+	bool mode = true;
+	for (int i = top_y; i < end_y; ++i) {
+		for (int j = top_x; j < end_x; ++j) {
+			if (rel_pseudo_con[Id(i, j)]) mode = false;
+		}
+	}
+
+	int r_aux = mode ? PseudoRoot(aux_cell) : Root(aux_cell);
+
 	for (int i = 0; i < db.size(); i++) {
 		int bit = db[i];
 
@@ -57,18 +66,20 @@ HYField::Status HYField::SolveVirtualRoomWithDatabase(int top_y, int top_x, int 
 			if (CellStatus(y, x) != BLACK) { // TODO
 				for (int j = 0; j < 4; j++) {
 					int y2 = y + dy[j] + dy[(j + 1) % 4], x2 = x + dx[j] + dx[(j + 1) % 4];
-					int bid = BlackUnitId(y2, x2);
+					int bid = BlackUnitId(y2, x2); if (bid == -1) continue;
+					bid = mode ? PseudoRoot(bid) : Root(bid);
 
 					if (Range(y2, x2) && top_y <= y2 && y2 < end_y && top_x <= x2 && x2 < end_x) continue;
-					if (bid == -1) continue;
-					if (bid == Root(aux_cell)) aux_flg = true;
+					if (bid == r_aux) aux_flg = true;
 					else adjs.push_back(bid);
 				}
 
 				if (aux_flg) ++n_aux;
 			}
 
-			if (CellStatus(y, x) == BLACK) repr = Root(y * width + x);
+			if (CellStatus(y, x) == BLACK) {
+				repr = mode ? PseudoRoot(y * width + x) : Root(y * width + x);
+			}
 
 			if (end_flg) {
 				if (n_aux >= 2) goto next;
