@@ -10,7 +10,7 @@ HYField::Status HYSolver::Solve(HYField &field)
 
 		AssureConnectivity(field);
 		CheckAllRoom(field);
-		CheckPseudoConnection(field);
+		//CheckPseudoConnection(field);
 	} while (field.status == HYField::NORMAL && cur_progress != field.GetProgress());
 
 	return field.status;

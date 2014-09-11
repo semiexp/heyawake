@@ -26,7 +26,7 @@ HYField::Status HYField::Load(HYProblem &prob)
 
 	n_rooms = prob.hint.size();
 
-	sz_pool = sizeof(Cell) * (height * width) + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms + sizeof(RSetId) * nSetCells + sizeof(CellId) * (height * width + 1);
+	sz_pool = sizeof(Cell) * (height * width) + sizeof(RestrictedSet) * n_rsets + sizeof(Room) * n_rooms + sizeof(RSetId) * nSetCells + (sizeof(CellId) * 2 + sizeof(bool)) * (height * width + 1);
 
 	pool = new char[sz_pool];
 	TrivialAllocator ta(pool);
@@ -36,6 +36,8 @@ HYField::Status HYField::Load(HYProblem &prob)
 	rooms = (Room*)ta.allocate(sizeof(Room) * n_rooms);
 	RSetId *rset_holder = (RSetId*)ta.allocate(sizeof(RSetId) * nSetCells);
 	conm = HYConnectionManager(height, width, (CellId*) ta.allocate(sizeof(CellId) * (height * width + 1)));
+	conm_ps = HYConnectionManager(height, width, (CellId*)ta.allocate(sizeof(CellId) * (height * width + 1)));
+	rel_pseudo_con = (bool*)ta.allocate(sizeof(bool) * (height * width + 1));
 
 	aux_cell = height * width;
 

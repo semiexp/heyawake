@@ -45,6 +45,8 @@ HYField::HYField(const HYField &src)
 	rsets = (RestrictedSet*)(pool + ((char*)src.rsets - src.pool));
 	rooms = (Room*)(pool + ((char*)src.rooms - src.pool));
 	conm = HYConnectionManager(height, width, (CellId*)(pool + ((char*)src.conm.GetPointer() - src.pool)));
+	conm_ps = HYConnectionManager(height, width, (CellId*)(pool + ((char*)src.conm_ps.GetPointer() - src.pool)));
+	rel_pseudo_con = (bool*)(pool + ((char*)src.rel_pseudo_con - src.pool));
 	memcpy(pool, src.pool, sz_pool);
 
 	for (int i = 0; i < height; i++) {
@@ -58,13 +60,19 @@ HYField::HYField(const HYField &src)
 
 HYField::~HYField()
 {
-	delete[] pool;
+	if(pool != nullptr) delete[] pool;
 }
 
 HYField::Status HYField::AssureConnectivity(CellCord y, CellCord x)
 {
-	if (!conm.CheckValidity(y, x)) {
-		return DetermineWhite(y, x);
+	if (rel_pseudo_con[Id(y, x)]) {
+		if (!conm.CheckValidity(y, x)) {
+			return DetermineWhite(y, x);
+		}
+	} else {
+		if (!conm_ps.CheckValidity(y, x)) {
+			return DetermineWhite(y, x);
+		}
 	}
 
 	return status;
@@ -108,8 +116,16 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 		int y2 = y + dy[i] + dy[(i + 1) % 4], x2 = x + dx[i] + dx[(i + 1) % 4];
 
 		int id2 = BlackUnitId(y2, x2);
-		if (id2 != -1) conm.Join(id, id2);
+		if (id2 != -1) {
+			conm.Join(id, id2);
+			conm_ps.Join(id, id2);
+		}
 	}
+
+	CheckPseudoConnection(y - 1, x);
+	CheckPseudoConnection(y + 1, x);
+	CheckPseudoConnection(y, x - 1);
+	CheckPseudoConnection(y, x + 1);
 
 	if (Range(y - 1, x)) DetermineWhite(y - 1, x);
 	if (Range(y + 1, x)) DetermineWhite(y + 1, x);

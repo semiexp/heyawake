@@ -1,6 +1,25 @@
 
 #include "heyawake.h"
 
+void HYField::CheckPseudoConnection(CellCord y, CellCord x)
+{
+	if (!Range(y, x)) return;
+
+	if (1 <= x && x < width - 1 && IsBlackOrOutOfRange(y - 1, x) && IsBlackOrOutOfRange(y + 1, x)) {
+		if (CellRoomId(y, x) != CellRoomId(y, x - 1) && CellRoomId(y, x) != CellRoomId(y, x + 1)) {
+			rel_pseudo_con[Id(y, x - 1)] = rel_pseudo_con[Id(y, x + 1)] = true;
+			conm_ps.Join(BlackUnitId(y - 1, x), BlackUnitId(y + 1, x));
+		}
+	}
+
+	if (1 <= y && y < height - 1 && IsBlackOrOutOfRange(y, x - 1) && IsBlackOrOutOfRange(y, x + 1)) {
+		if (CellRoomId(y, x) != CellRoomId(y - 1, x) && CellRoomId(y, x) != CellRoomId(y + 1, x)) {
+			rel_pseudo_con[Id(y - 1, x)] = rel_pseudo_con[Id(y + 1, x)] = true;
+			conm_ps.Join(BlackUnitId(y, x - 1), BlackUnitId(y, x + 1));
+		}
+	}
+}
+
 HYField::Status HYSolver::CheckPseudoConnection(HYField &field)
 {
 	int height = field.height, width = field.width;

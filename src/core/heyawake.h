@@ -92,8 +92,8 @@ class HYField
 		bool CellInclude(CellCord y, CellCord x) { return top_y <= y && y < end_y && top_x <= x && x < end_x; }
 	};
 
-	HYConnectionManager conm;
 	CellCord height, width;
+	HYConnectionManager conm, conm_ps; // normal manager, pseudo connection manager
 	RSetId n_rsets;
 	RoomId n_rooms;
 	Status status;
@@ -102,6 +102,8 @@ class HYField
 	Cell *field;
 	RestrictedSet *rsets;
 	Room *rooms;
+	bool *rel_pseudo_con;
+
 	char *pool;
 	int sz_pool;
 	
@@ -117,6 +119,8 @@ class HYField
 
 	CellId Root(CellId p) { return conm.Root(p); }
 	Status AssureConnectivity(CellCord y, CellCord x);
+
+	void CheckPseudoConnection(CellCord y, CellCord x);
 
 	Status Exclude(CellId cid);
 	Status ExcludeFromRSet(RSetId sid, CellId cid);
