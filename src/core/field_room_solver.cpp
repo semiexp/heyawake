@@ -222,6 +222,16 @@ HYField::Status HYField::SolveTrivialRoom(RoomId rid)
 		}
 	}
 
+	if (room_h == 3 && room_w == 2 && room.hint == 3) {
+		if (Range(room.top_y + 1, room.top_x - 1)) DetermineWhite(room.top_y + 1, room.top_x - 1);
+		if (Range(room.top_y + 1, room.top_x + 2)) DetermineWhite(room.top_y + 1, room.top_x + 2);
+	}
+
+	if (room_h == 2 && room_w == 3 && room.hint == 3) {
+		if (Range(room.top_y - 1, room.top_x + 1)) DetermineWhite(room.top_y - 1, room.top_x + 1);
+		if (Range(room.top_y + 2, room.top_x + 1)) DetermineWhite(room.top_y + 2, room.top_x + 1);
+	}
+
 	SolveRoom(rid);
 
 	return status;
