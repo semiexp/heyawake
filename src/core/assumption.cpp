@@ -38,6 +38,19 @@ HYField::Status HYSolver::Assume(HYField &field)
 						ret |= field.DetermineBlack(i, j);
 						update = true;
 					}
+
+					for (int y = 0; y < height; ++y) {
+						for (int x = 0; x < width; ++x) {
+							HYField::Status t_black = f_black.CellStatus(y, x), t_white = f_white.CellStatus(y, x);
+
+							if (t_black == HYField::BLACK && t_white == HYField::BLACK) {
+								ret |= field.DetermineBlack(y, x);
+							}
+							if (t_black == HYField::WHITE && t_white == HYField::WHITE) {
+								ret |= field.DetermineWhite(y, x);
+							}
+						}
+					}
 				}
 			}
 		}
