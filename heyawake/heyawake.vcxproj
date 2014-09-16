@@ -96,6 +96,7 @@
     <ClCompile Include="..\src\core\solver.cpp" />
     <ClCompile Include="..\src\core\connection_manager.cpp" />
     <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\testing\consecutive_solver.cpp" />
     <ClCompile Include="..\src\testing\perf_test.cpp" />
     <ClCompile Include="..\src\testing\problems.cpp" />
     <ClCompile Include="..\src\testing\problem_test.cpp" />

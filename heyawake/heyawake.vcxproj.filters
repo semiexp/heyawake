@@ -80,5 +80,8 @@
     <ClCompile Include="..\src\testing\pseudo_connection_test.cpp">
       <Filter>ソース ファイル\testing</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\testing\consecutive_solver.cpp">
+      <Filter>ソース ファイル\testing</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
