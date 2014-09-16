@@ -388,6 +388,33 @@ int problem8[][5] =
 	{ 8, 8, 2, 4, -1 },
 };
 
+/*
+ Source: http://www.janko.at/Raetsel/Heyawake/064.a.htm 
+*/
+
+int problem9[][5] = 
+{
+	{ 0, 0, 1, 3, -1 },
+	{ 0, 3, 8, 1, 4 },
+	{ 0, 4, 2, 3, -1 },
+	{ 0, 7, 4, 3, 4 },
+	{ 1, 0, 5, 2, 4 },
+	{ 1, 2, 5, 1, -1 },
+	{ 2, 4, 3, 2, -1 },
+	{ 2, 6, 4, 1, -1 },
+	{ 4, 7, 1, 3, -1 },
+	{ 5, 4, 3, 2, -1 },
+	{ 5, 7, 1, 3, -1 },
+	{ 6, 0, 1, 3, -1 },
+	{ 6, 6, 1, 4, -1 },
+	{ 7, 0, 3, 3, 4 },
+	{ 7, 6, 2, 4, 4 },
+	{ 8, 3, 2, 3, -1 },
+	{ 9, 6, 1, 2, -1 },
+	{ 9, 8, 1, 2, -1 }
+};
+
+
 HYProblem GetTestProblem(int pid)
 {
 	HYProblem ret;
@@ -433,6 +460,11 @@ HYProblem GetTestProblem(int pid)
 		ret = HYProblem(36, 20);
 		src = problem8;
 		len = sizeof(problem8) / (5 * sizeof(int));
+		break;
+	case 8:
+		ret = HYProblem(10, 10);
+		src = problem9;
+		len = sizeof(problem9) / (5 * sizeof(int));
 		break;
 	}
 
