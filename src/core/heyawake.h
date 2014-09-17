@@ -158,6 +158,7 @@ public:
 	CellId GetProgress() { return progress; }
 
 	void Debug();
+	void Debug2();
 };
 
 class HYSolver

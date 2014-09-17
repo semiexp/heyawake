@@ -47,6 +47,7 @@ HYField::HYField(const HYField &src)
 	conm = HYConnectionManager(height, width, (CellId*)(pool + ((char*)src.conm.GetPointer() - src.pool)));
 	conm_ps = HYConnectionManager(height, width, (CellId*)(pool + ((char*)src.conm_ps.GetPointer() - src.pool)));
 	rel_pseudo_con = (bool*)(pool + ((char*)src.rel_pseudo_con - src.pool));
+	aux_cell = src.aux_cell;
 	memcpy(pool, src.pool, sz_pool);
 
 	for (int i = 0; i < height; i++) {
@@ -106,7 +107,8 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 
 	AssureConnectivity(y, x);
 
-	if (field[id].stat == WHITE) return status |= INCONSISTENT;
+	if (field[id].stat == WHITE) 
+		return status |= INCONSISTENT;
 	/* TODO: Check the validity of the connection */
 	field[id].stat = BLACK;
 	++progress;
@@ -143,7 +145,8 @@ HYField::Status HYField::DetermineWhite(CellCord y, CellCord x)
 {
 	CellId id = Id(y, x);
 
-	if (field[id].stat == BLACK) return status |= INCONSISTENT;
+	if (field[id].stat == BLACK)
+		return status |= INCONSISTENT;
 	if (field[id].stat == WHITE) return status;
 
 	field[id].stat = WHITE;
@@ -214,4 +217,17 @@ void HYField::Debug()
 
 	fprintf(output, "\n");
 
+}
+
+void HYField::Debug2()
+{
+	FILE* output = stdout;
+
+	for (int i = 0; i < height; ++i) {
+		for (int j = 0; j < width; ++j) {
+			fprintf(output, "%3d ", PseudoRoot(Id(i, j)));
+		}
+		fprintf(output, "\n");
+	}
+	fprintf(output, "\n");
 }
