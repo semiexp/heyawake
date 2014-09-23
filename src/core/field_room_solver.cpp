@@ -150,6 +150,82 @@ HYField::Status HYField::SolveVirtualRoom(int top_y, int top_x, int end_y, int e
 	return status;
 }
 
+HYField::Status HYField::WhiteRestriction(RoomId rid)
+{
+	Room &room = rooms[rid];
+	if (room.hint == -1) return status;
+	
+	if (0 < room.top_y && room.end_y < height) {
+		int res = 0, n_black = 0;
+
+		for (int j = room.top_x; j < room.end_x; ++j) {
+			int row_black = 0;
+			for (int i = room.top_y; i < room.end_y; ++i) {
+				if (CellStatus(i, j) == BLACK) ++row_black;
+			}
+
+			if (row_black > 0) n_black += row_black;
+			else if (CellStatus(room.top_y - 1, j) == WHITE && CellStatus(room.end_y, j) == WHITE) ++res;
+		}
+
+		if (res + n_black > room.hint) return status |= INCONSISTENT;
+		if (res + n_black == room.hint) {
+			std::vector<std::pair<int, int> > cand;
+			for (int j = room.top_x; j < room.end_x; ++j) {
+				bool flg = CellStatus(room.top_y - 1, j) == WHITE && CellStatus(room.end_y, j) == WHITE;
+
+				for (int i = room.top_y; i < room.end_y; ++i) {
+					if (CellStatus(i, j) == BLACK) flg = false;
+				}
+
+				if (!flg) {
+					for (int i = room.top_y; i < room.end_y; ++i) {
+						if (CellStatus(i, j) == UNDECIDED) cand.push_back(std::make_pair(i, j));
+					}
+				}
+			}
+
+			for (auto c : cand) DetermineWhite(c.first, c.second);
+		}
+	}
+
+	if (0 < room.top_x && room.end_x < width) {
+		int res = 0, n_black = 0;
+
+		for (int i = room.top_y; i < room.end_y; ++i) {
+			int row_black = 0;
+			for (int j = room.top_x; j < room.end_x; ++j) {
+				if (CellStatus(i, j) == BLACK) ++row_black;
+			}
+
+			if (row_black > 0) n_black += row_black;
+			else if (CellStatus(i, room.top_x - 1) == WHITE && CellStatus(i, room.end_x) == WHITE) ++res;
+		}
+
+		if (res + n_black > room.hint) return status |= INCONSISTENT;
+		if (res + n_black == room.hint) {
+			std::vector<std::pair<int, int> > cand;
+			for (int i = room.top_y; i < room.end_y; ++i) {
+				bool flg = CellStatus(i, room.top_x - 1) == WHITE && CellStatus(i, room.end_x) == WHITE;
+
+				for (int j = room.top_x; j < room.end_x; ++j) {
+					if (CellStatus(i, j) == BLACK) flg = false;
+				}
+
+				if (!flg) {
+					for (int j = room.top_x; j < room.end_x; ++j) {
+						if (CellStatus(i, j) == UNDECIDED) cand.push_back(std::make_pair(i, j));
+					}
+				}
+			}
+
+			for (auto c : cand) DetermineWhite(c.first, c.second);
+		}
+	}
+
+	return status;
+}
+
 HYField::Status HYField::SolveRoom(RoomId rid)
 {
 	Room &room = rooms[rid];
@@ -180,6 +256,8 @@ HYField::Status HYField::SolveRoom(RoomId rid)
 			if (CellStatus(i, j) == BLACK) ++rem_hint;
 		}
 	}
+
+	WhiteRestriction(rid);
 
 	return SolveVirtualRoom(top_y, top_x, end_y, end_x, rem_hint);
 }
