@@ -1,7 +1,7 @@
 
 #include "heyawake.h"
 
-HYField::Status HYSolver::Assume(HYField &field)
+HYField::Status HYSolver::Assume(HYField &field, int depth)
 {
 	HYField::Status ret = HYField::NORMAL;
 
@@ -22,8 +22,13 @@ HYField::Status HYSolver::Assume(HYField &field)
 					f_black.DetermineBlack(i, j);
 					f_white.DetermineWhite(i, j);
 
-					Solve(f_black);
-					Solve(f_white);
+					if (depth == 1) {
+						Solve(f_black);
+						Solve(f_white);
+					} else {
+						Assume(f_black, depth - 1);
+						Assume(f_white, depth - 1);
+					}
 
 					if ((f_black.GetStatus() & HYField::INCONSISTENT) && (f_white.GetStatus() & HYField::INCONSISTENT)) {
 						return ret |= HYField::INCONSISTENT;

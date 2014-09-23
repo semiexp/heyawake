@@ -169,7 +169,7 @@ public:
 	static HYField::Status CheckPseudoConnection(HYField &field);
 
 	static HYField::Status Solve(HYField &field);
-	static HYField::Status Assume(HYField &field);
+	static HYField::Status Assume(HYField &field, int depth = 1);
 };
 
 class HYRoomDatabase

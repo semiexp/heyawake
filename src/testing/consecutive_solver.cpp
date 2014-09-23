@@ -19,8 +19,11 @@ bool Report(std::string &pid, int stat, int level)
 			std::cout << "Problem " << pid << ": Successfully solved without assumptions" << std::endl;
 			std::cerr << "Problem " << pid << ": Successfully solved without assumptions" << std::endl;
 		} else if (level == 1) {
-			std::cout << "Problem " << pid << ": Successfully solved with assumptions" << std::endl;
-			std::cerr << "Problem " << pid << ": Successfully solved with assumptions" << std::endl;
+			std::cout << "Problem " << pid << ": Successfully solved with assumptions (level 1)" << std::endl;
+			std::cerr << "Problem " << pid << ": Successfully solved with assumptions (level 1)" << std::endl;
+		} else if (level == 2) {
+			std::cout << "Problem " << pid << ": Successfully solved with assumptions (level 2)" << std::endl;
+			std::cerr << "Problem " << pid << ": Successfully solved with assumptions (level 2)" << std::endl;
 		}
 		++n_success;
 		return true;
@@ -59,9 +62,12 @@ void ConsecutiveSolver()
 		if (!Report(buf, field.GetStatus(), 0)) {
 			HYSolver::Assume(field);
 			if (!Report(buf, field.GetStatus(), 1)) {
-				++n_difficult;
-				std::cout << "Problem " << buf << ": Too difficult" << std::endl;
-				std::cerr << "Problem " << buf << ": Too difficult" << std::endl;
+				HYSolver::Assume(field, 2);
+				if (!Report(buf, field.GetStatus(), 2)) {
+					++n_difficult;
+					std::cout << "Problem " << buf << ": Too difficult" << std::endl;
+					std::cerr << "Problem " << buf << ": Too difficult" << std::endl;
+				}
 			}
 		}
 	}
