@@ -6,6 +6,7 @@
 HYField::Status HYField::SolveVirtualRoomWithDatabase(int top_y, int top_x, int end_y, int end_x, int hint)
 {
 	int room_h = end_y - top_y, room_w = end_x - top_x;
+	if (hint >= 0 && HYRoomDatabase::Limit(room_h, room_w) < hint) return status |= INCONSISTENT;
 	if (!HYRoomDatabase::IsAvailable(room_h, room_w, hint)) return status;
 
 	int black = 0, white = 0;

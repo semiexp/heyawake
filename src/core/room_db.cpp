@@ -4,6 +4,7 @@
 
 std::vector<std::vector<int> > HYRoomDatabase::room;
 std::vector<std::vector<std::vector<int> > > HYRoomDatabase::detail;
+int HYRoomDatabase::limit[10][10];
 int HYRoomDatabase::index[10][10][10];
 
 struct union_find
@@ -108,11 +109,20 @@ void HYRoomDatabase::Initialize()
 {
 	for (int i = 0; i < 10; ++i) {
 		for (int j = 0; j < 10; ++j) {
+			limit[i][j] = 100;
 			for (int k = 0; k < 10; ++k) {
 				index[i][j][k] = -1;
 			}
 		}
 	}
+
+	limit[1][1] = limit[1][2] = limit[2][1] = 1;
+	limit[2][2] = limit[1][3] = limit[3][1] = limit[1][4] = limit[4][1] = 2;
+	limit[2][3] = limit[3][2] = limit[1][5] = limit[5][1] = limit[1][6] = limit[6][1] = 3;
+	limit[2][4] = limit[4][2] = limit[1][7] = limit[7][1] = limit[1][8] = limit[8][1] = 4;
+	limit[3][3] = limit[3][4] = limit[4][3] = limit[2][5] = limit[5][2] = limit[1][9] = limit[9][1] = 5;
+	limit[2][6] = limit[6][2] = 6;
+	limit[3][5] = limit[5][3] = limit[2][7] = limit[7][2] = 7;
 
 	PreCalc(1, 1, 1);
 	PreCalc(1, 2, 1);
@@ -126,25 +136,18 @@ void HYRoomDatabase::Initialize()
 	PreCalc(1, 7, 4);
 	PreCalc(2, 2, 1);
 	PreCalc(2, 2, 2);
-	PreCalc(2, 2, 3);
 	PreCalc(2, 3, 1);
 	PreCalc(2, 3, 2);
 	PreCalc(2, 3, 3);
 	PreCalc(2, 4, 1);
-	//PreCalc(2, 4, 2);
 	PreCalc(2, 4, 3);
 	PreCalc(2, 4, 4);
 	PreCalc(2, 5, 5);
-	//PreCalc(2, 5, 4);
 	PreCalc(2, 6, 6);
 	PreCalc(3, 3, 1);
-	//PreCalc(3, 3, 2);
-	//PreCalc(3, 3, 3);
 	PreCalc(3, 3, 4);
 	PreCalc(3, 3, 5);
-	//PreCalc(3, 4, 2);
 	PreCalc(3, 4, 5);
-	//PreCalc(3, 5, 4);
 	PreCalc(3, 5, 7);
 	PreCalc(4, 4, 7);
 }

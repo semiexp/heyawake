@@ -179,6 +179,7 @@ class HYRoomDatabase
 	static std::vector<std::vector<std::vector<int> > > detail;
 
 	static int index[10][10][10];
+	static int limit[10][10];
 
 	static void Visit(int y, int x, int state, int hint, int height, int width, std::vector<int> &sto, std::vector<std::vector<int> > &sto_detail);
 	static void PreCalc(int height, int width, int hint);
@@ -188,4 +189,5 @@ public:
 	static bool IsAvailable(int height, int width, int hint) { return height <= 9 && width <= 9 && hint <= 9 && hint >= 0 && index[height][width][hint] >= 0; }
 	static std::vector<int> &Fetch(int height, int width, int hint) { return room[index[height][width][hint]]; }
 	static std::vector<std::vector<int> > &FetchDetail(int height, int width, int hint) { return detail[index[height][width][hint]]; }
+	static int Limit(int height, int width) { return (height <= 9 && width <= 9) ? limit[height][width] : 100; }
 };
