@@ -11,6 +11,8 @@ HYField::Status HYSolver::Assume(HYField &field, int depth)
 
 	bool update;
 
+	Solve(field);
+
 	do {
 		update = false;
 
