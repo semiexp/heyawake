@@ -164,6 +164,8 @@ int HYField::MaximumBlackCells(std::vector<int> &ys, std::vector<int> &xs)
 		if (end_x < x) end_x = x;
 	}
 
+	++end_y; ++end_x;
+
 	int room_h = end_y - top_y, room_w = end_x - top_x;
 	int tb_det = 0;
 
@@ -187,6 +189,8 @@ HYField::Status HYField::SolveSkewRoom(std::vector<int> &ys, std::vector<int> &x
 		if (x < top_x) top_x = x;
 		if (end_x < x) end_x = x;
 	}
+
+	++end_y; ++end_x;
 
 	int room_h = end_y - top_y, room_w = end_x - top_x;
 	int tb_det = 0;
@@ -216,12 +220,16 @@ HYField::Status HYField::SeparateRoom(int top_y, int top_x, int end_y, int end_x
 	UnionFind uf(room_h * room_w, uft.get());
 
 	for (int i = 0; i < room_h; ++i) {
-		for (int j = 0; j < room_w; ++j) if (CellStatus(i + top_y, j + top_x) == UNDECIDED) {
-			if (i + 1 < room_h && CellStatus(i + 1 + top_y, j + top_x) == UNDECIDED) {
-				uf.join((i + 1) * room_w + j, i * room_w + j);
-			}
-			if (j + 1 < room_w && CellStatus(i + top_y, j + 1 + top_x) == UNDECIDED) {
-				uf.join(i * room_w + j, i * room_w + (j + 1));
+		for (int j = 0; j < room_w; ++j) {
+			if (CellStatus(i + top_y, j + top_x) == UNDECIDED) {
+				if (i + 1 < room_h && CellStatus(i + 1 + top_y, j + top_x) == UNDECIDED) {
+					uf.join((i + 1) * room_w + j, i * room_w + j);
+				}
+				if (j + 1 < room_w && CellStatus(i + top_y, j + 1 + top_x) == UNDECIDED) {
+					uf.join(i * room_w + j, i * room_w + (j + 1));
+				}
+			} else if (CellStatus(i + top_y, j + top_x) == BLACK) {
+				--hint;
 			}
 		}
 	}
