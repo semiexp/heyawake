@@ -3,20 +3,23 @@
 
 #include <algorithm>
 
-HYField::Status HYField::SolveVirtualRoomWithDatabase(int top_y, int top_x, int end_y, int end_x, int hint)
+std::pair<int, int> HYField::SolveRegionSub(int top_y, int top_x, int end_y, int end_x, int hint, int tb_det)
 {
 	int room_h = end_y - top_y, room_w = end_x - top_x;
-	if (hint >= 0 && HYRoomDatabase::Limit(room_h, room_w) < hint) return status |= INCONSISTENT;
-	if (!HYRoomDatabase::IsAvailable(room_h, room_w, hint)) return status;
 
-	int black = 0, white = 0;
+	if (hint >= 0 && HYRoomDatabase::Limit(room_h, room_w) < hint) return std::make_pair(tb_det, tb_det);
+	if (!HYRoomDatabase::IsAvailable(room_h, room_w, hint)) return std::make_pair(0, 0);
+
+	int black = 0, white = ((1 << (room_w * room_h)) - 1) ^ tb_det;
 
 	for (int i = 0; i < room_h; ++i) {
 		for (int j = 0; j < room_w; ++j) {
 			HYField::Status c_stat = CellStatus(top_y + i, top_x + j);
 
-			if (c_stat == BLACK) black |= 1 << (i * room_w + j);
-			if (c_stat == WHITE) white |= 1 << (i * room_w + j);
+			if (tb_det & (1 << (i * room_w + j))) {
+				if (c_stat == BLACK) black |= 1 << (i * room_w + j);
+				if (c_stat == WHITE) white |= 1 << (i * room_w + j);
+			}
 		}
 	}
 
@@ -35,8 +38,6 @@ HYField::Status HYField::SolveVirtualRoomWithDatabase(int top_y, int top_x, int 
 		if (!((black & ~bit) == 0 && (white & bit) == 0)) continue;
 		++n_cand;
 	}
-
-	if (n_cand > 10) return status;
 
 	bool mode = true;
 	for (int i = top_y; i < end_y; ++i) {
@@ -104,6 +105,19 @@ HYField::Status HYField::SolveVirtualRoomWithDatabase(int top_y, int top_x, int 
 	next:
 		continue;
 	}
+
+	tb_black &= tb_det;
+	tb_white &= tb_det;
+
+	return std::make_pair(tb_black, tb_white);
+}
+
+HYField::Status HYField::SolveVirtualRoomWithDatabase(int top_y, int top_x, int end_y, int end_x, int hint)
+{
+	int room_h = end_y - top_y, room_w = end_x - top_x;
+
+	auto tmp = SolveRegionSub(top_y, top_x, end_y, end_x, hint, (1 << (room_h * room_w)) - 1);
+	int tb_black = tmp.first, tb_white = tmp.second;
 
 	for (int i = 0; i < room_h; i++) {
 		for (int j = 0; j < room_w; j++) {

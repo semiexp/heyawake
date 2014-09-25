@@ -128,6 +128,8 @@ class HYField
 	Status SolveRestrictedSet(RSetId sid);
 	Status SolveRoom(RoomId rid);
 	Status WhiteRestriction(RoomId id);
+	std::pair<int, int> SolveRegionSub(int top_y, int top_x, int end_y, int end_x, int hint, int tb_det);
+
 	Status SolveRoomWithDatabase(RoomId rid);
 	Status SolveVirtualRoomWithDatabase(int top_y, int top_x, int end_y, int end_x, int hint);
 	Status SolveVirtualRoom(int top_y, int top_x, int end_y, int end_x, int hint);
