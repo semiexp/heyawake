@@ -128,9 +128,14 @@ class HYField
 	Status SolveRestrictedSet(RSetId sid);
 	Status SolveRoom(RoomId rid);
 	Status WhiteRestriction(RoomId id);
-	std::pair<int, int> SolveRegionSub(int top_y, int top_x, int end_y, int end_x, int hint, int tb_det);
 
+	std::pair<int, int> SolveRegionSub(int top_y, int top_x, int end_y, int end_x, int hint, int tb_det);
+	int MaximumBlackCells(int top_y, int top_x, int end_y, int end_x, int tb_det);
+	int MaximumBlackCells(std::vector<int> &ys, std::vector<int> &xs);
 	Status SolveRoomWithDatabase(RoomId rid);
+	Status SolveSkewRoom(std::vector<int> &ys, std::vector<int> &xs, int hint);
+
+	Status SeparateRoom(int top_y, int top_x, int end_y, int end_x, int hint);
 	Status SolveVirtualRoomWithDatabase(int top_y, int top_x, int end_y, int end_x, int hint);
 	Status SolveVirtualRoom(int top_y, int top_x, int end_y, int end_x, int hint);
 	Status SolveTrivialRoom(RoomId rid);

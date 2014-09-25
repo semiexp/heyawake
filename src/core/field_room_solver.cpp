@@ -1,7 +1,9 @@
 
 #include "heyawake.h"
+#include "../util/util.h"
 
 #include <algorithm>
+#include <memory>
 
 std::pair<int, int> HYField::SolveRegionSub(int top_y, int top_x, int end_y, int end_x, int hint, int tb_det)
 {
@@ -129,6 +131,134 @@ HYField::Status HYField::SolveVirtualRoomWithDatabase(int top_y, int top_x, int 
 	return status;
 }
 
+int HYField::MaximumBlackCells(int top_y, int top_x, int end_y, int end_x, int tb_det)
+{
+	int room_h = end_y - top_y, room_w = end_x - top_x;
+	int ret = HYRoomDatabase::Limit(room_h, room_w);
+
+	while (ret > 0) {
+		auto tmp = SolveRegionSub(top_y, top_x, end_y, end_x, ret, tb_det);
+
+		if (tmp.first == tb_det && tmp.second == tb_det) {
+			--ret;
+			continue;
+		}
+
+		break;
+	}
+
+	return ret;
+}
+
+int HYField::MaximumBlackCells(std::vector<int> &ys, std::vector<int> &xs)
+{
+	int top_y = height, top_x = width, end_y = -1, end_x = -1;
+
+	for (int y : ys) {
+		if (y < top_y) top_y = y;
+		if (end_y < y) end_y = y;
+	}
+
+	for (int x : xs) {
+		if (x < top_x) top_x = x;
+		if (end_x < x) end_x = x;
+	}
+
+	int room_h = end_y - top_y, room_w = end_x - top_x;
+	int tb_det = 0;
+
+	for (int i = 0; i < ys.size(); ++i) {
+		tb_det |= 1 << ((ys[i] - top_y) * room_w + (xs[i] - top_x));
+	}
+
+	return MaximumBlackCells(top_y, top_x, end_y, end_x, tb_det);
+}
+
+HYField::Status HYField::SolveSkewRoom(std::vector<int> &ys, std::vector<int> &xs, int hint)
+{
+	int top_y = height, top_x = width, end_y = -1, end_x = -1;
+
+	for (int y : ys) {
+		if (y < top_y) top_y = y;
+		if (end_y < y) end_y = y;
+	}
+
+	for (int x : xs) {
+		if (x < top_x) top_x = x;
+		if (end_x < x) end_x = x;
+	}
+
+	int room_h = end_y - top_y, room_w = end_x - top_x;
+	int tb_det = 0;
+
+	for (int i = 0; i < ys.size(); ++i) {
+		tb_det |= 1 << ((ys[i] - top_y) * room_w + (xs[i] - top_x));
+	}
+
+	auto tmp = SolveRegionSub(top_y, top_x, end_y, end_x, hint, tb_det);
+	int tb_black = tmp.first, tb_white = tmp.second;
+
+	for (int i = 0; i < room_h; i++) {
+		for (int j = 0; j < room_w; j++) {
+			if (tb_black & (1 << (i * room_w + j))) DetermineBlack(top_y + i, top_x + j);
+			if (tb_white & (1 << (i * room_w + j))) DetermineWhite(top_y + i, top_x + j);
+		}
+	}
+
+	return status;
+}
+
+HYField::Status HYField::SeparateRoom(int top_y, int top_x, int end_y, int end_x, int hint)
+{
+	int room_h = end_y - top_y, room_w = end_x - top_x;
+
+	std::unique_ptr<int[]> uft(new int[room_h * room_w]);
+	UnionFind uf(room_h * room_w, uft.get());
+
+	for (int i = 0; i < room_h; ++i) {
+		for (int j = 0; j < room_w; ++j) if (CellStatus(i + top_y, j + top_x) == UNDECIDED) {
+			if (i + 1 < room_h && CellStatus(i + 1 + top_y, j + top_x) == UNDECIDED) {
+				uf.join((i + 1) * room_w + j, i * room_w + j);
+			}
+			if (j + 1 < room_w && CellStatus(i + top_y, j + 1 + top_x) == UNDECIDED) {
+				uf.join(i * room_w + j, i * room_w + (j + 1));
+			}
+		}
+	}
+
+	std::vector<std::vector<int> > yss, xss;
+	std::vector<int> maxs;
+
+	for (int i = 0; i < room_h * room_w; ++i) {
+		if (uf.root(i) == i && CellStatus(top_y + i / room_w, top_x + i % room_w) == UNDECIDED) {
+			std::vector<int> ys, xs;
+
+			for (int j = 0; j < room_h * room_w; ++j) {
+				if (uf.root(j) == i && CellStatus(top_y + j / room_w, top_x + j % room_w) == UNDECIDED) {
+					ys.push_back(top_y + j / room_w);
+					xs.push_back(top_x + j % room_w);
+				}
+			}
+
+			yss.push_back(ys);
+			xss.push_back(xs);
+		}
+	}
+
+	int max_black = 0;
+	for (int i = 0; i < yss.size(); ++i) {
+		int tmp = MaximumBlackCells(yss[i], xss[i]);
+		max_black += MaximumBlackCells(yss[i], xss[i]);
+		maxs.push_back(tmp);
+	}
+
+	if (max_black != hint) return status;
+
+	for (int i = 0; i < yss.size(); ++i) SolveSkewRoom(yss[i], xss[i], maxs[i]);
+
+	return status;
+}
+
 HYField::Status HYField::SolveVirtualRoom(int top_y, int top_x, int end_y, int end_x, int hint)
 {
 	SolveVirtualRoomWithDatabase(top_y, top_x, end_y, end_x, hint);
@@ -161,6 +291,8 @@ HYField::Status HYField::SolveVirtualRoom(int top_y, int top_x, int end_y, int e
 			}
 		}
 	}
+
+	SeparateRoom(top_y, top_x, end_y, end_x, hint);
 
 	return status;
 }
