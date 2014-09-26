@@ -151,6 +151,7 @@ public:
 	static const Status NORMAL = 0;
 	static const Status SOLVED = 1;
 	static const Status INCONSISTENT = 2;
+	static const Status MULTIPLE_ANSWER = 4;
 
 	HYField();
 	HYField(HYProblem &prob);
@@ -158,6 +159,7 @@ public:
 	~HYField();
 
 	Status Load(HYProblem &prob);
+	void CopyStatus(const HYField &src);
 
 	Status DetermineWhite(CellCord y, CellCord x);
 	Status DetermineBlack(CellCord y, CellCord x);
@@ -178,6 +180,7 @@ public:
 
 	static HYField::Status Solve(HYField &field);
 	static HYField::Status Assume(HYField &field, int depth = 1);
+	static HYField::Status BruteForce(HYField &field, int depth = 0);
 };
 
 class HYRoomDatabase

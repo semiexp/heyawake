@@ -88,6 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\assumption.cpp" />
+    <ClCompile Include="..\src\core\brute_force.cpp" />
     <ClCompile Include="..\src\core\field.cpp" />
     <ClCompile Include="..\src\core\field_loader.cpp" />
     <ClCompile Include="..\src\core\field_room_solver.cpp" />
@@ -96,6 +97,7 @@
     <ClCompile Include="..\src\core\solver.cpp" />
     <ClCompile Include="..\src\core\connection_manager.cpp" />
     <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\testing\brute_test.cpp" />
     <ClCompile Include="..\src\testing\consecutive_solver.cpp" />
     <ClCompile Include="..\src\testing\perf_test.cpp" />
     <ClCompile Include="..\src\testing\problems.cpp" />

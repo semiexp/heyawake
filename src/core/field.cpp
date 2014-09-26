@@ -36,7 +36,7 @@ HYField::HYField(const HYField &src)
 	n_rsets = src.n_rsets;
 	n_rooms = src.n_rooms;
 	status = src.status;
-	progress = 0;
+	progress = src.progress;
 
 	sz_pool = src.sz_pool;
 	pool = new char[sz_pool];
@@ -62,6 +62,39 @@ HYField::HYField(const HYField &src)
 HYField::~HYField()
 {
 	if(pool != nullptr) delete[] pool;
+}
+
+void HYField::CopyStatus(const HYField &src)
+{
+	height = src.height;
+	width = src.width;
+	n_rsets = src.n_rsets;
+	n_rooms = src.n_rooms;
+	status = src.status;
+	progress = src.progress;
+
+	if (sz_pool != src.sz_pool) {
+		delete[] pool;
+		sz_pool = src.sz_pool;
+		pool = new char[sz_pool];
+	}
+
+	field = (Cell*)(pool + ((char*)src.field - src.pool));
+	rsets = (RestrictedSet*)(pool + ((char*)src.rsets - src.pool));
+	rooms = (Room*)(pool + ((char*)src.rooms - src.pool));
+	conm = HYConnectionManager(height, width, (CellId*)(pool + ((char*)src.conm.GetPointer() - src.pool)));
+	conm_ps = HYConnectionManager(height, width, (CellId*)(pool + ((char*)src.conm_ps.GetPointer() - src.pool)));
+	rel_pseudo_con = (bool*)(pool + ((char*)src.rel_pseudo_con - src.pool));
+	aux_cell = src.aux_cell;
+	memcpy(pool, src.pool, sz_pool);
+
+	for (int i = 0; i < height; i++) {
+		for (int j = 0; j < width; j++) {
+			int id = Id(i, j);
+
+			field[id].cond = (RSetId*)(pool + ((char*)src.field[id].cond - src.pool));
+		}
+	}
 }
 
 HYField::Status HYField::AssureConnectivity(CellCord y, CellCord x)

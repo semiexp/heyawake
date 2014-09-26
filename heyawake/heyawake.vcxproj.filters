@@ -83,5 +83,11 @@
     <ClCompile Include="..\src\testing\consecutive_solver.cpp">
       <Filter>ソース ファイル\testing</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\brute_force.cpp">
+      <Filter>ソース ファイル\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\testing\brute_test.cpp">
+      <Filter>ソース ファイル\testing</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
