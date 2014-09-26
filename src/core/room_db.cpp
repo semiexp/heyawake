@@ -98,7 +98,6 @@ void HYRoomDatabase::PreCalc(int height, int width, int hint)
 	Visit(0, 0, 0, hint, height, width, ret, ret_detail);
 
 	index[height][width][hint] = room.size();
-	printf("%d %d %d: %d\n", height, width, hint, ret.size());
 	room.push_back(ret);
 	detail.push_back(ret_detail);
 
