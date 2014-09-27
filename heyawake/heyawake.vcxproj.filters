@@ -92,5 +92,8 @@
     <ClCompile Include="..\src\core\evaluator.cpp">
       <Filter>ソース ファイル\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\testing\evaluator_test.cpp">
+      <Filter>ソース ファイル\testing</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
