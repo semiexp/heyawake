@@ -99,7 +99,7 @@ void HYField::CopyStatus(const HYField &src)
 
 HYField::Status HYField::AssureConnectivity(CellCord y, CellCord x)
 {
-	if (rel_pseudo_con[Id(y, x)]) {
+	if (method.pseudo_connection && rel_pseudo_con[Id(y, x)]) {
 		if (!conm.CheckValidity(y, x)) {
 			return DetermineWhite(y, x);
 		}
@@ -118,7 +118,9 @@ HYField::Status HYField::ExcludeFromRSet(RSetId sid, CellId cid)
 	--rsets[sid].rem_cells;
 	rsets[sid].stat |= field[cid].stat;
 
-	return SolveRestrictedSet(sid);
+	if (method.three_room) SolveRestrictedSet(sid);
+
+	return status;
 }
 
 HYField::Status HYField::Exclude(CellId cid)
@@ -163,10 +165,12 @@ HYField::Status HYField::DetermineBlack(CellCord y, CellCord x)
 	CheckPseudoConnection(y, x - 1);
 	CheckPseudoConnection(y, x + 1);
 
-	if (Range(y - 1, x)) DetermineWhite(y - 1, x);
-	if (Range(y + 1, x)) DetermineWhite(y + 1, x);
-	if (Range(y, x - 1)) DetermineWhite(y, x - 1);
-	if (Range(y, x + 1)) DetermineWhite(y, x + 1);
+	if (method.adjacent_black) {
+		if (Range(y - 1, x)) DetermineWhite(y - 1, x);
+		if (Range(y + 1, x)) DetermineWhite(y + 1, x);
+		if (Range(y, x - 1)) DetermineWhite(y, x - 1);
+		if (Range(y, x + 1)) DetermineWhite(y, x + 1);
+	}
 
 	Exclude(id);
 	// ret |= SolveRoom(field[id].room_id);

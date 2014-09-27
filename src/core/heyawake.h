@@ -49,6 +49,28 @@ public:
 	bool CheckValidity(CellCord y, CellCord x);
 };
 
+struct HYSolverMethod
+{
+	bool adjacent_black;
+	bool cell_connectivity;
+	bool three_room;
+	bool pseudo_connection;
+	bool room_check;
+	bool virtual_room;
+	bool separate_room;
+	bool white_restriction;
+
+	HYSolverMethod() : adjacent_black(true), cell_connectivity(true), three_room(true), pseudo_connection(true), room_check(true), virtual_room(true), separate_room(true), white_restriction(true) {}
+
+	void EnableAll() {
+		adjacent_black = cell_connectivity = three_room = pseudo_connection = room_check = virtual_room = separate_room = white_restriction = true;
+	}
+
+	void DisableAll() {
+		adjacent_black = cell_connectivity = three_room = pseudo_connection = room_check = virtual_room = separate_room = white_restriction = false;
+	}
+};
+
 class HYField
 {
 	struct Cell;
@@ -107,6 +129,8 @@ class HYField
 	char *pool;
 	int sz_pool;
 	
+	HYSolverMethod method;
+
 	static int dx[4];
 	static int dy[4];
 
@@ -166,6 +190,9 @@ public:
 
 	Status GetStatus() { return status; }
 	CellId GetProgress() { return progress; }
+
+	HYSolverMethod GetSolverMethod() { return method; }
+	void SetSolverMethod(HYSolverMethod &m) { method = m; }
 
 	void Debug();
 	void Debug2();

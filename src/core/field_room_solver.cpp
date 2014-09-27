@@ -300,7 +300,7 @@ HYField::Status HYField::SolveVirtualRoom(int top_y, int top_x, int end_y, int e
 		}
 	}
 
-	SeparateRoom(top_y, top_x, end_y, end_x, hint);
+	if (method.separate_room) SeparateRoom(top_y, top_x, end_y, end_x, hint);
 
 	return status;
 }
@@ -384,7 +384,9 @@ HYField::Status HYField::WhiteRestriction(RoomId rid)
 HYField::Status HYField::SolveRoom(RoomId rid)
 {
 	Room &room = rooms[rid];
-	if (room.hint == -1) return NORMAL;
+	if (room.hint == -1) return status;
+
+	if (!method.virtual_room) return SolveVirtualRoom(room.top_y, room.top_x, room.end_y, room.end_x, room.hint);
 
 	CellCord top_y = 127, top_x = 127, end_y = -1, end_x = -1;
 	CellId rem_hint = room.hint;

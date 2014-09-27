@@ -5,11 +5,11 @@
 
 int main(int argc, char* argv[])
 {
-	//ProblemTest(8);
+	ProblemTest(7);
 	//PerformanceTest(7, 300);
 	//PseudoConnectionTest();
 	//ConsecutiveSolver();
-	BruteTest(-1);
+	//BruteTest(-1);
 
 	return 0;
 }

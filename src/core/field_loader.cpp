@@ -35,7 +35,7 @@ HYField::Status HYField::Load(HYProblem &prob)
 	rsets = (RestrictedSet*)ta.allocate(sizeof(RestrictedSet) * n_rsets);
 	rooms = (Room*)ta.allocate(sizeof(Room) * n_rooms);
 	RSetId *rset_holder = (RSetId*)ta.allocate(sizeof(RSetId) * nSetCells);
-	conm = HYConnectionManager(height, width, (CellId*) ta.allocate(sizeof(CellId) * (height * width + 1)));
+	conm = HYConnectionManager(height, width, (CellId*)ta.allocate(sizeof(CellId) * (height * width + 1)));
 	conm_ps = HYConnectionManager(height, width, (CellId*)ta.allocate(sizeof(CellId) * (height * width + 1)));
 	rel_pseudo_con = (bool*)ta.allocate(sizeof(bool) * (height * width + 1));
 
@@ -146,7 +146,9 @@ HYField::Status HYField::Load(HYProblem &prob)
 	}
 
 	Status ret = NORMAL;
-	for (int i = 0; i < n_rooms; i++) ret |= SolveTrivialRoom(i);
+	if (method.room_check) {
+		for (int i = 0; i < n_rooms; i++) ret |= SolveTrivialRoom(i);
+	}
 
 	return ret;
 }
