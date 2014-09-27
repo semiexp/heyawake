@@ -4,6 +4,7 @@
 class HYProblem;
 class HYField;
 class HYSolver;
+class HYEvaluator;
 
 class HYProblem
 {
@@ -166,6 +167,7 @@ class HYField
 
 	friend class HYSolver;
 	friend class HYConnectionManager;
+	friend class HYEvaluator;
 
 public:
 	static const Status UNDECIDED = 0;
@@ -227,4 +229,26 @@ public:
 	static std::vector<int> &Fetch(int height, int width, int hint) { return room[index[height][width][hint]]; }
 	static std::vector<std::vector<int> > &FetchDetail(int height, int width, int hint) { return detail[index[height][width][hint]]; }
 	static int Limit(int height, int width) { return (height <= 9 && width <= 9) ? limit[height][width] : 100; }
+};
+
+class HYEvaluator
+{
+	static double ADJACENT_BLACK;
+	static double CELL_CONNECTIVITY;
+	static double THREE_ROOM;
+	static double PSEUDO_CONNECTION;
+	
+public:
+	typedef std::pair<double, std::vector<std::pair<int, int> > > StepCand;
+	typedef std::vector<StepCand> StepStore;
+
+	static void CheckAdjacentBlack(HYField &field, StepStore &sto);
+	static void CheckCellConnectivity(HYField &field, StepStore &sto);
+	static void CheckThreeRoom(HYField &field, StepStore &sto);
+	static void CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, int top_x, int end_y, int end_x, int hint, double ofs);
+	static void ShrinkRoom(HYField &field, StepStore &sto, int room_id);
+	static void CheckRoom(HYField &field, StepStore &sto, int room_id);
+
+	static double Step(HYField &field);
+	static double Evaluate(HYProblem &prob);
 };

@@ -89,6 +89,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\core\assumption.cpp" />
     <ClCompile Include="..\src\core\brute_force.cpp" />
+    <ClCompile Include="..\src\core\evaluator.cpp" />
     <ClCompile Include="..\src\core\field.cpp" />
     <ClCompile Include="..\src\core\field_loader.cpp" />
     <ClCompile Include="..\src\core\field_room_solver.cpp" />
