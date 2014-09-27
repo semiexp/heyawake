@@ -27,7 +27,7 @@ void HYEvaluator::CheckAdjacentBlack(HYField &field, StepStore &sto)
 				int y = i + HYField::dy[k], x = j + HYField::dx[k];
 
 				if (field.Range(y, x) && field.CellStatus(y, x) == HYField::UNDECIDED) {
-					cands.push_back(std::make_pair(field.Id(i, j), 0));
+					cands.push_back(std::make_pair(field.Id(y, x), 0));
 				}
 			}
 
@@ -44,6 +44,8 @@ void HYEvaluator::CheckCellConnectivity(HYField &field, StepStore &sto)
 		for (int j = 0; j < width; ++j) {
 			// TODO: proper way to estimate 'weight' is the distance in the tree
 
+			if (field.CellStatus(i, j) != HYField::UNDECIDED) continue;
+
 			if (!field.rel_pseudo_con[field.Id(i, j)]) {
 				if (!field.conm_ps.CheckValidity(i, j)) {
 					sto.push_back(SingleCandidate(field.Id(i, j), 0, PSEUDO_CONNECTION));
@@ -59,7 +61,7 @@ void HYEvaluator::CheckCellConnectivity(HYField &field, StepStore &sto)
 void HYEvaluator::CheckThreeRoom(HYField &field, StepStore &sto)
 {
 	for (int i = 0; i < field.n_rsets; ++i) {
-		if (field.rsets[i].rem_cells == 1) {
+		if (field.rsets[i].rem_cells == 1 && !(field.rsets[i].stat & HYField::BLACK)) {
 			sto.push_back(SingleCandidate(field.rsets[i].xor_id, 1, THREE_ROOM));
 		}
 	}
@@ -72,7 +74,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 	int n_black = 0, n_undecided = 0;
 	for (int i = top_y; i < end_y; ++i) {
 		for (int j = top_x; j < end_x; ++j) {
-			HYField::Status st = field.CellStatus(top_y + i, top_x + j);
+			HYField::Status st = field.CellStatus(i, j);
 			if (st == HYField::UNDECIDED) {
 				++n_undecided;
 			}
@@ -85,8 +87,8 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 
 		for (int i = top_y; i < end_y; ++i) {
 			for (int j = top_x; j < end_x; ++j) {
-				if (field.CellStatus(top_y + i, top_x + j) == HYField::UNDECIDED) {
-					cands.push_back(std::make_pair(field.Id(top_y + i, top_x + j), 0));
+				if (field.CellStatus(i, j) == HYField::UNDECIDED) {
+					cands.push_back(std::make_pair(field.Id(i, j), 0));
 				}
 			}
 		}
@@ -101,8 +103,8 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 
 		for (int i = top_y; i < end_y; ++i) {
 			for (int j = top_x; j < end_x; ++j) {
-				if (field.CellStatus(top_y + i, top_x + j) == HYField::UNDECIDED) {
-					cands.push_back(std::make_pair(field.Id(top_y + i, top_x + j), 1));
+				if (field.CellStatus(i, j) == HYField::UNDECIDED) {
+					cands.push_back(std::make_pair(field.Id(i, j), 1));
 				}
 			}
 		}
@@ -170,10 +172,10 @@ void HYEvaluator::ShrinkRoom(HYField &field, StepStore &sto, int room_id)
 	for (int i = room.top_y; i < room.end_y; ++i) {
 		for (int j = room.top_x; j < room.end_x; ++j) {
 			if (field.CellStatus(i, j) == HYField::UNDECIDED) {
-				if (top_y < i) top_y = i;
-				if (i < end_y) end_y = i;
-				if (top_x < j) top_x = j;
-				if (j < end_x) end_x = j;
+				if (i < top_y) top_y = i;
+				if (end_y < i) end_y = i;
+				if (j < top_x) top_x = j;
+				if (end_x < j) end_x = j;
 			}
 			else if (field.CellStatus(i, j) == HYField::BLACK) --rem_hint;
 		}
@@ -201,6 +203,11 @@ void HYEvaluator::CheckRoom(HYField &field, StepStore &sto, int room_id)
 	ShrinkRoom(field, sto, room_id);
 }
 
+void HYEvaluator::CheckAllRoom(HYField &field, StepStore &sto)
+{
+	for (int i = 0; i < field.n_rooms; ++i) CheckRoom(field, sto, i);
+}
+
 double HYEvaluator::Step(HYField &field)
 {
 	// (step weight, (cell, white: 0, black: 1) )
@@ -211,6 +218,7 @@ double HYEvaluator::Step(HYField &field)
 	CheckAdjacentBlack(field, cand);
 	CheckCellConnectivity(field, cand);
 	CheckThreeRoom(field, cand);
+	CheckAllRoom(field, cand);
 
 	if (cand.size() == 0) return -1.0;
 
@@ -234,6 +242,8 @@ double HYEvaluator::Step(HYField &field)
 		if (pt.second == 0) field.DetermineWhite(y, x);
 		if (pt.second == 1) field.DetermineBlack(y, x);
 	}
+
+	printf("%d %f\n", hand_point.size(), lval);
 
 	double ret = 0;
 	for (auto& c : cand) {
@@ -260,11 +270,12 @@ double HYEvaluator::Evaluate(HYProblem &prob)
 	while (field.GetStatus() == HYField::NORMAL) {
 		double st = Step(field);
 
-		if (st < 0) return -1;
+		if (st < 0) break;
 		ret += st;
 	}
 
 	if (field.GetStatus() == HYField::SOLVED) return ret;
-
+	printf("%d\n", field.GetStatus());
+	field.Debug();
 	return -1;
 }

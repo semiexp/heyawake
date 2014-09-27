@@ -248,6 +248,7 @@ public:
 	static void CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, int top_x, int end_y, int end_x, int hint, double ofs);
 	static void ShrinkRoom(HYField &field, StepStore &sto, int room_id);
 	static void CheckRoom(HYField &field, StepStore &sto, int room_id);
+	static void CheckAllRoom(HYField &field, StepStore &sto);
 
 	static double Step(HYField &field);
 	static double Evaluate(HYProblem &prob);
