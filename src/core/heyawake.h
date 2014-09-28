@@ -241,6 +241,7 @@ class HYEvaluator
 	static const int PATTERN_VALID = 0;
 	static const int PATTERN_OCCUPIED = 1;
 	static const int PATTERN_DISJOINT = 2;
+	static const int PATTERN_PSEUDO_DISJOINT = 3;
 
 public:
 	typedef std::pair<double, std::vector<std::pair<int, int> > > StepCand;
@@ -250,7 +251,8 @@ public:
 	static void CheckCellConnectivity(HYField &field, StepStore &sto);
 	static void CheckThreeRoom(HYField &field, StepStore &sto);
 	static void CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, int top_x, int end_y, int end_x, int hint, double ofs);
-	static int CheckValidityOfPattern(HYField &field, int top_y, int top_x, int end_y, int end_x, std::vector<int> ys, std::vector<int> xs);
+	static int CheckValidityOfPattern(HYField &field, int top_y, int top_x, int end_y, int end_x, std::vector<int> &ys, std::vector<int> &xs, bool mode);
+	static int CheckValidityOfPattern(HYField &field, int top_y, int top_x, int end_y, int end_x, std::vector<int> &ys, std::vector<int> &xs);
 	static void ShrinkRoom(HYField &field, StepStore &sto, int room_id);
 	static void CheckRoom(HYField &field, StepStore &sto, int room_id);
 	static void CheckAllRoom(HYField &field, StepStore &sto);

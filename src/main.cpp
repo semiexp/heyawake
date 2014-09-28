@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
 	//PseudoConnectionTest();
 	//ConsecutiveSolver();
 	//BruteTest(-1);
-	EvaluateTest(4);
+	for(int i = 0; i <= 5; ++i) EvaluateTest(i);
 
 	return 0;
 }
