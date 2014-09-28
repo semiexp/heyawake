@@ -5,9 +5,9 @@
 #include <cmath>
 
 const double HYEvaluator::ADJACENT_BLACK = 0.1;
-const double HYEvaluator::CELL_CONNECTIVITY = 0.5;
+const double HYEvaluator::CELL_CONNECTIVITY = 0.4;
 const double HYEvaluator::THREE_ROOM = 0.1;
-const double HYEvaluator::PSEUDO_CONNECTION = 3.0;
+const double HYEvaluator::PSEUDO_CONNECTION = 2.0;
 
 HYEvaluator::StepCand SingleCandidate(int cell, int type, double weight)
 {
@@ -252,22 +252,46 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 		int st1 = CheckValidityOfPattern(field, top_y, top_x, end_y, end_x, ys1, xs1);
 		int st2 = CheckValidityOfPattern(field, top_y, top_x, end_y, end_x, ys2, xs2);
 
-		if (st1 == PATTERN_VALID && st2 == PATTERN_VALID) return;
-
 		std::vector<std::pair<int, int> > cands;
-		int black_p = (st1 == PATTERN_VALID ? 0 : 1);
 
-		for (int i = 0; i < room_h; ++i) {
-			for (int j = 0; j < room_w; ++j) {
-				if (field.CellStatus(top_y + i, top_x + j) != HYField::UNDECIDED) continue;
+		if (!(st1 == PATTERN_VALID && st2 == PATTERN_VALID)) {
+			int black_p = (st1 == PATTERN_VALID ? 0 : 1);
 
-				cands.push_back(std::make_pair(field.Id(top_y + i, top_x + j), ((i + j) % 2 == black_p) ? 1 : 0));
+			for (int i = 0; i < room_h; ++i) {
+				for (int j = 0; j < room_w; ++j) {
+					if (field.CellStatus(top_y + i, top_x + j) != HYField::UNDECIDED) continue;
+
+					cands.push_back(std::make_pair(field.Id(top_y + i, top_x + j), ((i + j) % 2 == black_p) ? 1 : 0));
+				}
+			}
+		}
+		int cause = st1 + st2 - PATTERN_VALID;
+		double difficulty =
+			(cause == PATTERN_VALID || cause == PATTERN_OCCUPIED) ? 2.0: (cause == PATTERN_DISJOINT ? 3.0 : 6.0);
+
+		if (room_h == 2 && hint == room_w) {
+			for (int i = 0; i < room_w; ++i) {
+				if ((i == 0 && top_x != 0) || (i == room_w - 1 && end_x != field.width)) continue;
+
+				if (field.Range(top_y - 1, top_x + i) && field.CellStatus(top_y - 1, top_x + i) == HYField::UNDECIDED)
+					cands.push_back(std::make_pair(field.Id(top_y - 1, top_x + i), 0));
+
+				if (field.Range(top_y + 2, top_x + i) && field.CellStatus(top_y + 2, top_x + i) == HYField::UNDECIDED)
+					cands.push_back(std::make_pair(field.Id(top_y + 2, top_x + i), 0));
 			}
 		}
 
-		int cause = st1 + st2 - PATTERN_VALID;
-		double difficulty =
-			cause == PATTERN_OCCUPIED ? 2.0: (cause == PATTERN_DISJOINT ? 3.0 : 6.0);
+		if (room_w == 2 && hint == room_h) {
+			for (int i = 0; i < room_h; ++i) {
+				if ((i == 0 && top_y != 0) || (i == room_h - 1 && end_y != field.width)) continue;
+
+				if (field.Range(top_y + i, top_x - 1) && field.CellStatus(top_y + i, top_x - 1) == HYField::UNDECIDED)
+					cands.push_back(std::make_pair(field.Id(top_y + i, top_x - 1), 0));
+
+				if (field.Range(top_y + i, top_x + 2) && field.CellStatus(top_y + i, top_x + 2) == HYField::UNDECIDED)
+					cands.push_back(std::make_pair(field.Id(top_y + i, top_x + 2), 0));
+			}
+		}
 
 		if (cands.size() > 0) sto.push_back(std::make_pair(difficulty, cands));
 
@@ -347,11 +371,6 @@ double HYEvaluator::Step(HYField &field)
 	}
 
 	auto& hand_point = cand[lp].second;
-
-	if (hand_point[0].first == 76) {
-		int x = 0;
-		++x;
-	}
 
 	for (auto& pt : hand_point) {
 		int y = pt.first / width;
