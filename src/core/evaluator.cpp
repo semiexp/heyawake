@@ -91,6 +91,8 @@ int HYEvaluator::CheckValidityOfPattern(HYField &field, int top_y, int top_x, in
 
 	st = CheckValidityOfPattern(field, top_y, top_x, end_y, end_x, ys, xs, true);
 	if (st == PATTERN_DISJOINT) st = PATTERN_PSEUDO_DISJOINT;
+
+	return st;
 }
 
 int HYEvaluator::CheckValidityOfPattern(HYField &field, int top_y, int top_x, int end_y, int end_x, std::vector<int> &ys, std::vector<int> &xs, bool mode)
@@ -443,7 +445,7 @@ void HYEvaluator::ShrinkRoom(HYField &field, StepStore &sto, int room_id)
 		}
 	}
 
-	CheckVirtualRoom(field, sto, top_y, top_x, end_y, end_x, rem_hint, (rem_hint == room.hint ? 1.0 : 2.0));
+	CheckVirtualRoom(field, sto, top_y, top_x, end_y, end_x, rem_hint, (rem_hint == room.hint ? 0.5 : 0.7));
 }
 
 void HYEvaluator::SeparateRoom(HYField &field, StepStore &sto, int room_id)
