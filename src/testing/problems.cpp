@@ -195,10 +195,44 @@ int problem6[][5] =
 };
 
 /*
-Source: http://www.nikoli.com/en/puzzles/heyawake/ Sample 8 (flipped)
+Source: http://www.nikoli.com/en/puzzles/heyawake/ Sample 6
 */
 
 int problem7[][5] =
+{
+	{ 0, 0, 3, 2, 2 },
+	{ 3, 0, 3, 2, 2 },
+	{ 6, 0, 4, 2, 2 },
+	{ 8, 2, 2, 3, 2 },
+	{ 8, 5, 2, 2, 1 },
+	{ 8, 7, 2, 4, 3 },
+	{ 8, 11, 2, 4, -1 },
+	{ 8, 15, 2, 3, 2 },
+	{ 4, 2, 4, 2, 2 },
+	{ 4, 4, 4, 2, 4 },
+	{ 1, 2, 3, 4, 3 },
+	{ 0, 16, 2, 2, 2 },
+	{ 0, 15, 2, 1, -1 },
+	{ 2, 15, 4, 3, 3 },
+	{ 6, 15, 2, 3, 3 },
+	{ 6, 14, 2, 1, -1 },
+	{ 6, 11, 2, 3, 2 },
+	{ 3, 13, 3, 2, 3 },
+	{ 3, 11, 3, 2, 2 },
+	{ 6, 8, 2, 3, 3 },
+	{ 3, 6, 1, 5, 3 },
+	{ 4, 8, 2, 3, 2 },
+	{ 4, 6, 4, 2, -1 },
+	{ 1, 6, 2, 9, 5 },
+	{ 0, 2, 1, 7, 3 },
+	{ 0, 9, 1, 6, -1 }
+};
+
+/*
+Source: http://www.nikoli.com/en/puzzles/heyawake/ Sample 8 (flipped)
+*/
+
+int problem8[][5] =
 {
 	{0, 12, 2, 2, -1},
 	{ 0, 10, 3, 2, -1 },
@@ -252,7 +286,7 @@ int problem7[][5] =
 Source: http://www.nikoli.com/en/puzzles/heyawake/ Sample 10 (flipped)
 */
 
-int problem8[][5] =
+int problem9[][5] =
 {
 	{0, 0, 2, 2, 2},
 	{ 2, 0, 2, 2, -1 },
@@ -392,7 +426,7 @@ int problem8[][5] =
  Source: http://www.janko.at/Raetsel/Heyawake/064.a.htm 
 */
 
-int problem9[][5] = 
+int problem10[][5] = 
 {
 	{ 0, 0, 1, 3, -1 },
 	{ 0, 3, 8, 1, 4 },
@@ -452,19 +486,24 @@ HYProblem GetTestProblem(int pid)
 		len = sizeof(problem6) / (5 * sizeof(int));
 		break;
 	case 6:
-		ret = HYProblem(24, 14);
+		ret = HYProblem(10, 18);
 		src = problem7;
 		len = sizeof(problem7) / (5 * sizeof(int));
 		break;
 	case 7:
-		ret = HYProblem(36, 20);
+		ret = HYProblem(24, 14);
 		src = problem8;
 		len = sizeof(problem8) / (5 * sizeof(int));
 		break;
 	case 8:
-		ret = HYProblem(10, 10);
+		ret = HYProblem(36, 20);
 		src = problem9;
 		len = sizeof(problem9) / (5 * sizeof(int));
+		break;
+	case 9:
+		ret = HYProblem(10, 10);
+		src = problem10;
+		len = sizeof(problem10) / (5 * sizeof(int));
 		break;
 	}
 
