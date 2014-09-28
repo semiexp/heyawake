@@ -1,8 +1,10 @@
 
 #include "heyawake.h"
+#include "../util/util.h"
 
 #include <algorithm>
 #include <cmath>
+#include <memory>
 
 const double HYEvaluator::ADJACENT_BLACK = 0.1;
 const double HYEvaluator::CELL_CONNECTIVITY = 0.4;
@@ -444,6 +446,121 @@ void HYEvaluator::ShrinkRoom(HYField &field, StepStore &sto, int room_id)
 	CheckVirtualRoom(field, sto, top_y, top_x, end_y, end_x, rem_hint, (rem_hint == room.hint ? 1.0 : 2.0));
 }
 
+void HYEvaluator::SeparateRoom(HYField &field, StepStore &sto, int room_id)
+{
+	HYField::Room &room = field.rooms[room_id];
+
+	int room_h = room.end_y - room.top_y, room_w = room.end_x - room.top_x;
+	int hint = room.hint;
+
+	std::unique_ptr<int[]> uft(new int[room_h * room_w]);
+	UnionFind uf(room_h * room_w, uft.get());
+
+	for (int i = 0; i < room_h; ++i) {
+		for (int j = 0; j < room_w; ++j) {
+			if (field.CellStatus(i + room.top_y, j + room.top_x) == HYField::UNDECIDED) {
+				if (i + 1 < room_h && field.CellStatus(i + 1 + room.top_y, j + room.top_x) == HYField::UNDECIDED) {
+					uf.join((i + 1) * room_w + j, i * room_w + j);
+				}
+				if (j + 1 < room_w && field.CellStatus(i + room.top_y, j + 1 + room.top_x) == HYField::UNDECIDED) {
+					uf.join(i * room_w + j, i * room_w + (j + 1));
+				}
+			}
+			else if (field.CellStatus(i + room.top_y, j + room.top_x) == HYField::BLACK) {
+				--hint;
+			}
+		}
+	}
+
+	bool update;
+	do{
+		update = false;
+
+		for (int i = 0; i < room_h; ++i) {
+			for (int j = 0; j < room_w; ++j) if (field.CellStatus(i + room.top_y, j + room.top_x) == HYField::UNDECIDED && uf.root(i * room_w + j) == i * room_w + j) {
+				int top_y = 127, top_x = 127, end_y = -1, end_x = -1;
+				int id = i * room_w + j;
+
+				for (int y = 0; y < room_h; ++y) {
+					for (int x = 0; x < room_w; ++x) {
+						if (field.CellStatus(y + room.top_y, x + room.top_x) == HYField::UNDECIDED && uf.root(y * room_w + x) == id) {
+							if (y < top_y) top_y = y;
+							if (end_y < y) end_y = y;
+							if (x < top_x) top_x = x;
+							if (end_x < x) end_x = x;
+						}
+					}
+				}
+
+				++end_y; ++end_x;
+
+				for (int y = top_y; y < end_y; ++y) {
+					for (int x = top_x; x < end_x; ++x) {
+						if (field.CellStatus(y + room.top_y, x + room.top_x) == HYField::UNDECIDED) {
+							int id2 = y * room_w + x;
+							if (uf.root(id) != uf.root(id2)) {
+								update = true;
+								uf.join(id, id2);
+							}
+						}
+					}
+				}
+			}
+		}
+	} while (update);
+
+	std::vector<int> top_ys, top_xs, end_ys, end_xs, m_blacks;
+
+	for (int i = 0; i < room_h; ++i) {
+		for (int j = 0; j < room_w; ++j) {
+			if (field.CellStatus(i + room.top_y, j + room.top_x) == HYField::UNDECIDED && uf.root(i * room_w + j) == i * room_w + j) {
+				int top_y = 127, top_x = 127, end_y = -1, end_x = -1;
+				int id = i * room_w + j;
+
+				for (int y = 0; y < room_h; ++y) {
+					for (int x = 0; x < room_w; ++x) {
+						if (field.CellStatus(y + room.top_y, x + room.top_x) == HYField::UNDECIDED && uf.root(y * room_w + x) == id) {
+							if (y < top_y) top_y = y;
+							if (end_y < y) end_y = y;
+							if (x < top_x) top_x = x;
+							if (end_x < x) end_x = x;
+						}
+					}
+				}
+
+				++end_y; ++end_x;
+
+				for (int y = top_y; y < end_y; ++y) {
+					for (int x = top_x; x < end_x; ++x) {
+						if (field.CellStatus(y + room.top_y, x + room.top_x) == HYField::BLACK) ++hint;
+					}
+				}
+
+				if ((end_y - top_y) * (end_x - top_x) > 30) return;
+
+				int m_black = field.MaximumBlackCells(top_y, top_x, end_y, end_x, -1);
+
+				top_ys.push_back(top_y);
+				top_xs.push_back(top_x);
+				end_ys.push_back(end_y);
+				end_xs.push_back(end_x);
+				m_blacks.push_back(m_black);
+			}
+		}
+	}
+
+	if (m_blacks.size() <= 1) return;
+
+	int tot = 0;
+	for (int m : m_blacks) tot += m;
+
+	if (tot == hint) {
+		for (int i = 0; i < top_ys.size(); ++i) {
+			CheckVirtualRoom(field, sto, top_ys[i], top_xs[i], end_ys[i], end_xs[i], m_blacks[i], 3.0);
+		}
+	}
+}
+
 void HYEvaluator::CheckRoom(HYField &field, StepStore &sto, int room_id)
 {
 	HYField::Room &room = field.rooms[room_id];
@@ -453,6 +570,7 @@ void HYEvaluator::CheckRoom(HYField &field, StepStore &sto, int room_id)
 
 	ShrinkRoom(field, sto, room_id);
 	CheckWhiteRestriction(field, sto, room_id);
+	SeparateRoom(field, sto, room_id);
 }
 
 void HYEvaluator::CheckAllRoom(HYField &field, StepStore &sto)

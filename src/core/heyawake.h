@@ -255,6 +255,7 @@ public:
 	static int CheckValidityOfPattern(HYField &field, int top_y, int top_x, int end_y, int end_x, std::vector<int> &ys, std::vector<int> &xs, bool mode);
 	static int CheckValidityOfPattern(HYField &field, int top_y, int top_x, int end_y, int end_x, std::vector<int> &ys, std::vector<int> &xs);
 	static void ShrinkRoom(HYField &field, StepStore &sto, int room_id);
+	static void SeparateRoom(HYField &field, StepStore &sto, int room_id);
 	static void CheckRoom(HYField &field, StepStore &sto, int room_id);
 	static void CheckAllRoom(HYField &field, StepStore &sto);
 
