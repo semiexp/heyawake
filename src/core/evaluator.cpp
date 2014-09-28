@@ -199,6 +199,44 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 			
 			return;
 		}
+
+		if (hint == 4) {
+			std::vector<std::pair<int, int> > cands;
+			std::vector<std::pair<int, int> > black_cand;
+
+			for (int i = 0; i < 3; ++i) {
+				for (int j = 0; j < 3; ++j) {
+					if ((i + j) % 2 == 0) {
+						black_cand.push_back(std::make_pair(top_y + i, top_x + j));
+					}
+					if (field.CellStatus(top_y + i, top_x + j) == HYField::UNDECIDED && (i + j) % 2 == 1) {
+						cands.push_back(std::make_pair(field.Id(top_y + i, top_x + j), 0));
+					}
+				}
+			}
+
+			for (int i = 0; i < 5; ++i) {
+				if (i == 2) continue;
+
+				std::vector<int> ys, xs;
+				for (int j = 0; j < 5; ++j) if (i != j) {
+					ys.push_back(black_cand[j].first);
+					xs.push_back(black_cand[j].second);
+				}
+
+				int st = CheckValidityOfPattern(field, top_y, top_x, end_y, end_x, ys, xs);
+
+				if (st != PATTERN_VALID) {
+					if (field.CellStatus(black_cand[i].first, black_cand[i].second) == HYField::UNDECIDED) {
+						cands.push_back(std::make_pair(field.Id(black_cand[i].first, black_cand[i].second), 1));
+					}
+				}
+			}
+
+			if (cands.size() > 0) sto.push_back(std::make_pair(3.0 + ofs, cands));
+
+			return;
+		}
 	}
 
 	if (room_h == 1 && room_w % 2 == 1 && hint == (room_w + 1) / 2) {
