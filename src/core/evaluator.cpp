@@ -3,10 +3,10 @@
 
 #include <algorithm>
 
-double HYEvaluator::ADJACENT_BLACK = 1.0;
-double HYEvaluator::CELL_CONNECTIVITY = 2.0;
-double HYEvaluator::THREE_ROOM = 1.0;
-double HYEvaluator::PSEUDO_CONNECTION = 5.0;
+const double HYEvaluator::ADJACENT_BLACK = 1.0;
+const double HYEvaluator::CELL_CONNECTIVITY = 2.0;
+const double HYEvaluator::THREE_ROOM = 1.0;
+const double HYEvaluator::PSEUDO_CONNECTION = 5.0;
 
 HYEvaluator::StepCand SingleCandidate(int cell, int type, double weight)
 {
@@ -65,6 +65,42 @@ void HYEvaluator::CheckThreeRoom(HYField &field, StepStore &sto)
 			sto.push_back(SingleCandidate(field.rsets[i].xor_id, 1, THREE_ROOM));
 		}
 	}
+}
+
+int HYEvaluator::CheckValidityOfPattern(HYField &field, int top_y, int top_x, int end_y, int end_x, std::vector<int> ys, std::vector<int> xs)
+{
+	// Assume that the pattern is formed by diagonally connected black cells
+
+	for (int i = 0; i < ys.size(); ++i) {
+		if (field.CellStatus(ys[i], xs[i]) == HYField::WHITE) return PATTERN_OCCUPIED;
+	}
+
+	int aux_cnt = 0;
+	int r_aux = field.Root(field.aux_cell);
+
+	std::vector<int> adjs;
+
+	for (int i = 0; i < ys.size(); ++i) {
+		bool aux_flg = false;
+
+		for (int j = 0; j < 4; ++j) {
+			int y2 = ys[i] + HYField::dy[j] + HYField::dy[(j + 1) % 4], x2 = xs[i] + HYField::dx[j] + HYField::dx[(j + 1) % 4];
+			int bid = field.BlackUnitId(y2, x2); if (bid == -1) continue;
+			bid = field.Root(bid);
+
+			if (field.Range(y2, x2) && top_y <= y2 && y2 < end_y && top_x <= x2 && x2 < end_x) continue;
+			if (bid == r_aux) aux_flg = true;
+			else adjs.push_back(bid);
+		}
+
+		if (aux_flg) ++aux_cnt;
+	}
+
+	if (aux_cnt >= 2) return PATTERN_DISJOINT;
+	std::sort(adjs.begin(), adjs.end());
+	for (int i = 1; i < adjs.size(); ++i) if (adjs[i] == adjs[i - 1]) return PATTERN_DISJOINT;
+
+	return PATTERN_VALID;
 }
 
 void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, int top_x, int end_y, int end_x, int hint, double ofs)
@@ -160,6 +196,49 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 		return;
 	}
 
+	if ((room_h == 2 && hint == room_w) || (room_w == 2 && hint == room_h)) {
+		std::vector<int> ys1, xs1, ys2, xs2;
+
+		for (int i = 0; i < room_h; ++i) {
+			for (int j = 0; j < room_w; ++j) {
+				if ((i + j) % 2 == 0) {
+					ys1.push_back(top_y + i);
+					xs1.push_back(top_x + j);
+				}
+				else {
+					ys2.push_back(top_y + i);
+					xs2.push_back(top_x + j);
+				}
+			}
+		}
+
+		if (top_y == 1 && top_x == 6) {
+			top_y += 0;
+		}
+
+		int st1 = CheckValidityOfPattern(field, top_y, top_x, end_y, end_x, ys1, xs1);
+		int st2 = CheckValidityOfPattern(field, top_y, top_x, end_y, end_x, ys2, xs2);
+
+		if (st1 == PATTERN_VALID && st2 == PATTERN_VALID) return;
+
+		std::vector<std::pair<int, int> > cands;
+		int black_p = (st1 == PATTERN_VALID ? 0 : 1);
+
+		for (int i = 0; i < room_h; ++i) {
+			for (int j = 0; j < room_w; ++j) {
+				if (field.CellStatus(top_y + i, top_x + j) != HYField::UNDECIDED) continue;
+
+				cands.push_back(std::make_pair(field.Id(top_y + i, top_x + j), ((i + j) % 2 == black_p) ? 1 : 0));
+			}
+		}
+
+		int cause = st1 + st2 - PATTERN_VALID;
+		double difficulty = (cause == PATTERN_OCCUPIED ? 2.0 : 4.0);
+
+		if (cands.size() > 0) sto.push_back(std::make_pair(difficulty, cands));
+
+		return;
+	}
 }
 
 void HYEvaluator::ShrinkRoom(HYField &field, StepStore &sto, int room_id)
@@ -235,6 +314,11 @@ double HYEvaluator::Step(HYField &field)
 
 	auto& hand_point = cand[lp].second;
 
+	if (hand_point[0].first == 76) {
+		int x = 0;
+		++x;
+	}
+
 	for (auto& pt : hand_point) {
 		int y = pt.first / width;
 		int x = pt.first % width;
@@ -275,7 +359,8 @@ double HYEvaluator::Evaluate(HYProblem &prob)
 	}
 
 	if (field.GetStatus() == HYField::SOLVED) return ret;
-	printf("%d\n", field.GetStatus());
+	printf("%d / %f\n", field.GetStatus(), ret);
 	field.Debug();
+	field.Debug2();
 	return -1;
 }

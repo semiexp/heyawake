@@ -99,7 +99,7 @@ void HYField::CopyStatus(const HYField &src)
 
 HYField::Status HYField::AssureConnectivity(CellCord y, CellCord x)
 {
-	if (method.pseudo_connection && rel_pseudo_con[Id(y, x)]) {
+	if (!method.pseudo_connection || rel_pseudo_con[Id(y, x)]) {
 		if (!conm.CheckValidity(y, x)) {
 			return DetermineWhite(y, x);
 		}
