@@ -251,6 +251,7 @@ public:
 	static void CheckCellConnectivity(HYField &field, StepStore &sto);
 	static void CheckThreeRoom(HYField &field, StepStore &sto);
 	static void CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, int top_x, int end_y, int end_x, int hint, double ofs);
+	static void CheckWhiteRestriction(HYField &field, StepStore &sto, int rid);
 	static int CheckValidityOfPattern(HYField &field, int top_y, int top_x, int end_y, int end_x, std::vector<int> &ys, std::vector<int> &xs, bool mode);
 	static int CheckValidityOfPattern(HYField &field, int top_y, int top_x, int end_y, int end_x, std::vector<int> &ys, std::vector<int> &xs);
 	static void ShrinkRoom(HYField &field, StepStore &sto, int room_id);

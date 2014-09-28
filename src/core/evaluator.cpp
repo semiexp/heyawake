@@ -136,6 +136,81 @@ int HYEvaluator::CheckValidityOfPattern(HYField &field, int top_y, int top_x, in
 	return PATTERN_VALID;
 }
 
+void HYEvaluator::CheckWhiteRestriction(HYField &field, StepStore &sto, int rid)
+{
+	HYField::Room &room = field.rooms[rid];
+	if (room.hint == -1) return;
+
+	int height = field.height, width = field.width;
+	std::vector<std::pair<int, int> > cands;
+
+	if (0 < room.top_y && room.end_y < height) {
+		int res = 0, n_black = 0;
+
+		for (int j = room.top_x; j < room.end_x; ++j) {
+			int row_black = 0;
+			for (int i = room.top_y; i < room.end_y; ++i) {
+				if (field.CellStatus(i, j) == HYField::BLACK) ++row_black;
+			}
+
+			if (row_black > 0) n_black += row_black;
+			else if (field.CellStatus(room.top_y - 1, j) == HYField::WHITE && field.CellStatus(room.end_y, j) == HYField::WHITE) ++res;
+		}
+
+		if (res + n_black == room.hint) {
+			for (int j = room.top_x; j < room.end_x; ++j) {
+				bool flg = field.CellStatus(room.top_y - 1, j) == HYField::WHITE && field.CellStatus(room.end_y, j) == HYField::WHITE;
+
+				for (int i = room.top_y; i < room.end_y; ++i) {
+					if (field.CellStatus(i, j) == HYField::BLACK) flg = false;
+				}
+
+				if (!flg) {
+					for (int i = room.top_y; i < room.end_y; ++i) {
+						if (field.CellStatus(i, j) == HYField::UNDECIDED) {
+							cands.push_back(std::make_pair(field.Id(i, j), 0));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (0 < room.top_x && room.end_x < width) {
+		int res = 0, n_black = 0;
+
+		for (int i = room.top_y; i < room.end_y; ++i) {
+			int row_black = 0;
+			for (int j = room.top_x; j < room.end_x; ++j) {
+				if (field.CellStatus(i, j) == HYField::BLACK) ++row_black;
+			}
+
+			if (row_black > 0) n_black += row_black;
+			else if (field.CellStatus(i, room.top_x - 1) == HYField::WHITE && field.CellStatus(i, room.end_x) == HYField::WHITE) ++res;
+		}
+
+		if (res + n_black == room.hint) {
+			for (int i = room.top_y; i < room.end_y; ++i) {
+				bool flg = field.CellStatus(i, room.top_x - 1) == HYField::WHITE && field.CellStatus(i, room.end_x) == HYField::WHITE;
+
+				for (int j = room.top_x; j < room.end_x; ++j) {
+					if (field.CellStatus(i, j) == HYField::BLACK) flg = false;
+				}
+
+				if (!flg) {
+					for (int j = room.top_x; j < room.end_x; ++j) {
+						if (field.CellStatus(i, j) == HYField::UNDECIDED) {
+							cands.push_back(std::make_pair(field.Id(i, j), 0));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (cands.size() > 0) sto.push_back(std::make_pair(4.0, cands));
+}
+
 void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, int top_x, int end_y, int end_x, int hint, double ofs)
 {
 	int room_h = end_y - top_y, room_w = end_x - top_x;
@@ -372,10 +447,12 @@ void HYEvaluator::ShrinkRoom(HYField &field, StepStore &sto, int room_id)
 void HYEvaluator::CheckRoom(HYField &field, StepStore &sto, int room_id)
 {
 	HYField::Room &room = field.rooms[room_id];
+	if (room.hint == -1) return;
 
 	CheckVirtualRoom(field, sto, room.top_y, room.top_x, room.end_y, room.end_x, room.hint, 0.0);
 
 	ShrinkRoom(field, sto, room_id);
+	CheckWhiteRestriction(field, sto, room_id);
 }
 
 void HYEvaluator::CheckAllRoom(HYField &field, StepStore &sto)
