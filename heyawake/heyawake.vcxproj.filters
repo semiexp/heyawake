@@ -22,6 +22,9 @@
     <Filter Include="ソース ファイル\testing">
       <UniqueIdentifier>{5640a5e4-6905-4d65-8d8b-dea0101fdaa6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\frontend">
+      <UniqueIdentifier>{43801021-5bcd-4e6e-b3b8-be34152fb360}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -38,6 +41,9 @@
     </ClInclude>
     <ClInclude Include="..\src\testing\testing.h">
       <Filter>ソース ファイル\testing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\frontend\frontend.h">
+      <Filter>ソース ファイル\frontend</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -94,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="..\src\testing\evaluator_test.cpp">
       <Filter>ソース ファイル\testing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\frontend\pb_loader.cpp">
+      <Filter>ソース ファイル\frontend</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
