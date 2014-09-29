@@ -542,10 +542,10 @@ void HYEvaluator::SeparateRoom(HYField &field, StepStore &sto, int room_id)
 
 				int m_black = field.MaximumBlackCells(top_y, top_x, end_y, end_x, -1);
 
-				top_ys.push_back(top_y);
-				top_xs.push_back(top_x);
-				end_ys.push_back(end_y);
-				end_xs.push_back(end_x);
+				top_ys.push_back(top_y + room.top_y);
+				top_xs.push_back(top_x + room.top_x);
+				end_ys.push_back(end_y + room.top_y);
+				end_xs.push_back(end_x + room.top_x);
 				m_blacks.push_back(m_black);
 			}
 		}
@@ -614,8 +614,6 @@ double HYEvaluator::Step(HYField &field)
 		if (pt.second == 0) field.DetermineWhite(y, x);
 		if (pt.second == 1) field.DetermineBlack(y, x);
 	}
-
-	// printf("%d %f\n", hand_point.size(), lval);
 
 	double ret = 0;
 	for (auto& c : cand) {
