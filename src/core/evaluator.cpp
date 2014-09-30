@@ -6,10 +6,10 @@
 #include <cmath>
 #include <memory>
 
-const double HYEvaluator::ADJACENT_BLACK = 0.1;
-const double HYEvaluator::CELL_CONNECTIVITY = 0.4;
-const double HYEvaluator::THREE_ROOM = 0.1;
-const double HYEvaluator::PSEUDO_CONNECTION = 2.0;
+const double HYEvaluator::ADJACENT_BLACK = 1;
+const double HYEvaluator::CELL_CONNECTIVITY = 1;
+const double HYEvaluator::THREE_ROOM = 1;
+const double HYEvaluator::PSEUDO_CONNECTION = 2;
 
 HYEvaluator::StepCand SingleCandidate(int cell, int type, double weight)
 {
@@ -212,7 +212,7 @@ void HYEvaluator::CheckWhiteRestriction(HYField &field, StepStore &sto, int rid)
 		}
 	}
 
-	if (cands.size() > 0) sto.push_back(std::make_pair(4.0, cands));
+	if (cands.size() > 0) sto.push_back(std::make_pair(1.0 * cands.size(), cands));
 }
 
 void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, int top_x, int end_y, int end_x, int hint, double ofs)
@@ -241,7 +241,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 			}
 		}
 
-		if(cands.size() > 0) sto.push_back(std::make_pair(1.0 + ofs, cands));
+		if(cands.size() > 0) sto.push_back(std::make_pair(1.0 * cands.size() + ofs, cands));
 
 		return;
 	}
@@ -257,7 +257,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 			}
 		}
 
-		if(cands.size() > 0) sto.push_back(std::make_pair(1.0 + ofs, cands));
+		if(cands.size() > 0) sto.push_back(std::make_pair(1.0 * cands.size() + ofs, cands));
 
 		return;
 	}
@@ -274,7 +274,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 				}
 			}
 
-			if(cands.size() > 0) sto.push_back(std::make_pair(3.0 + ofs, cands));
+			if(cands.size() > 0) sto.push_back(std::make_pair(1.0 * cands.size() + ofs, cands));
 			
 			return;
 		}
@@ -312,7 +312,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 				}
 			}
 
-			if (cands.size() > 0) sto.push_back(std::make_pair(3.0 + ofs, cands));
+			if (cands.size() > 0) sto.push_back(std::make_pair(1.0 * cands.size() + ofs, cands));
 
 			return;
 		}
@@ -327,7 +327,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 			}
 		}
 
-		if (cands.size() > 0) sto.push_back(std::make_pair(2.0 + ofs, cands));
+		if (cands.size() > 0) sto.push_back(std::make_pair(1.0 * cands.size() + ofs, cands));
 
 		return;
 	}
@@ -341,7 +341,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 			}
 		}
 
-		if (cands.size() > 0) sto.push_back(std::make_pair(2.0 + ofs, cands));
+		if (cands.size() > 0) sto.push_back(std::make_pair(1.0 * cands.size() + ofs, cands));
 
 		return;
 	}
@@ -384,7 +384,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 		}
 		int cause = st1 + st2 - PATTERN_VALID;
 		double difficulty =
-			(cause == PATTERN_VALID || cause == PATTERN_OCCUPIED) ? 2.0: (cause == PATTERN_DISJOINT ? 3.0 : 6.0);
+			(cause == PATTERN_VALID || cause == PATTERN_OCCUPIED) ? 1.0 : (cause == PATTERN_DISJOINT ? 1.1 : 1.5);
 
 		if (room_h == 2 && hint == room_w) {
 			for (int i = 0; i < room_w; ++i) {
@@ -400,7 +400,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 
 		if (room_w == 2 && hint == room_h) {
 			for (int i = 0; i < room_h; ++i) {
-				if ((i == 0 && top_y != 0) || (i == room_h - 1 && end_y != field.width)) continue;
+				if ((i == 0 && top_y != 0) || (i == room_h - 1 && end_y != field.height)) continue;
 
 				if (field.Range(top_y + i, top_x - 1) && field.CellStatus(top_y + i, top_x - 1) == HYField::UNDECIDED)
 					cands.push_back(std::make_pair(field.Id(top_y + i, top_x - 1), 0));
@@ -410,7 +410,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 			}
 		}
 
-		if (cands.size() > 0) sto.push_back(std::make_pair(difficulty, cands));
+		if (cands.size() > 0) sto.push_back(std::make_pair(difficulty * cands.size() + ofs, cands));
 
 		return;
 	}
@@ -445,7 +445,7 @@ void HYEvaluator::ShrinkRoom(HYField &field, StepStore &sto, int room_id)
 		}
 	}
 
-	CheckVirtualRoom(field, sto, top_y, top_x, end_y, end_x, rem_hint, (rem_hint == room.hint ? 0.5 : 0.7));
+	CheckVirtualRoom(field, sto, top_y, top_x, end_y, end_x, rem_hint, (rem_hint == room.hint ? 0.5 : 0.6));
 }
 
 void HYEvaluator::SeparateRoom(HYField &field, StepStore &sto, int room_id)
@@ -558,7 +558,7 @@ void HYEvaluator::SeparateRoom(HYField &field, StepStore &sto, int room_id)
 
 	if (tot == hint) {
 		for (int i = 0; i < top_ys.size(); ++i) {
-			CheckVirtualRoom(field, sto, top_ys[i], top_xs[i], end_ys[i], end_xs[i], m_blacks[i], 3.0);
+			CheckVirtualRoom(field, sto, top_ys[i], top_xs[i], end_ys[i], end_xs[i], m_blacks[i], 0.5);
 		}
 	}
 }
@@ -617,14 +617,14 @@ double HYEvaluator::Step(HYField &field)
 
 	double ret = 0;
 	for (auto& c : cand) {
-		double cand_cost = c.first;
+		double cand_cost = c.first / c.second.size();
 
 		// ret += 1 / (cand_cost + 1e-7);
-		ret += pow(cand_cost, -2.5);
+		ret += pow(cand_cost, -2.0);
 	}
 
 	//ret = (1 / ret) - 1e-7;
-	ret = pow(ret, -0.4);
+	ret = pow(ret, -(1 / 2.0)) * hand_point.size();
 
 	return ret;
 }
@@ -649,6 +649,5 @@ double HYEvaluator::Evaluate(HYProblem &prob)
 	if (field.GetStatus() == HYField::SOLVED) return ret;
 	printf("%d / %f\n", field.GetStatus(), ret);
 	field.Debug();
-	field.Debug2();
 	return -1;
 }
