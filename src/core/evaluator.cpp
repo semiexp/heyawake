@@ -6,10 +6,10 @@
 #include <cmath>
 #include <memory>
 
-const double HYEvaluator::ADJACENT_BLACK = 1;
-const double HYEvaluator::CELL_CONNECTIVITY = 1;
-const double HYEvaluator::THREE_ROOM = 1;
-const double HYEvaluator::PSEUDO_CONNECTION = 2;
+const double HYEvaluator::ADJACENT_BLACK = 1.0;
+const double HYEvaluator::CELL_CONNECTIVITY = 1.0;
+const double HYEvaluator::THREE_ROOM = 1.0;
+const double HYEvaluator::PSEUDO_CONNECTION = 2.0;
 
 HYEvaluator::StepCand SingleCandidate(int cell, int type, double weight)
 {
@@ -580,6 +580,93 @@ void HYEvaluator::CheckAllRoom(HYField &field, StepStore &sto)
 	for (int i = 0; i < field.n_rooms; ++i) CheckRoom(field, sto, i);
 }
 
+int HYEvaluator::SolveArea(HYField &field, int top_y, int top_x, int end_y, int end_x)
+{
+	int height = field.height, width = field.width;
+
+	if (top_y < 0) top_y = 0;
+	if (end_y >= height) end_y = height;
+	if (top_x < 0) top_x = 0;
+	if (end_x >= width) end_x = width;
+
+	int cur_progress;
+
+	do {
+		cur_progress = field.GetProgress();
+
+		// three room
+		for (int i = 0; i < field.n_rsets; ++i) {
+			if (field.rsets[i].rem_cells == 1 && !(field.rsets[i].stat & HYField::BLACK)) {
+				int loc = field.rsets[i].xor_id;
+				int y = loc / width, x = loc % width;
+
+				if (top_y <= y && y < end_y && top_x <= x && x < end_x) {
+					field.DetermineBlack(y, x);
+				}
+			}
+		}
+
+		// adjacent black
+		for (int i = top_y; i < end_y; ++i) {
+			for (int j = top_x; j < end_x; ++j) {
+				bool flg = false;
+				for (int k = 0; k < 4; ++k) {
+					int y = i + HYField::dy[k], x = j + HYField::dx[k];
+
+					if (field.Range(y, x) && field.CellStatus(y, x) == HYField::BLACK) {
+						flg = true;
+					}
+				}
+
+				if (flg) field.DetermineWhite(i, j);
+			}
+		}
+
+		// room check
+		for (int i = top_y; i < end_y; ++i) {
+			for (int j = top_x; j < end_x; ++j) {
+				int rid = field.field[field.Id(i, j)].room_id;
+				auto room = field.rooms[rid];
+
+				if (room.top_y == i && room.top_x == j && room.end_y <= end_y && room.end_x <= end_x) {
+					field.SolveRoom(rid);
+				}
+			}
+		}
+	} while (field.GetStatus() == HYField::NORMAL && cur_progress != field.GetProgress());
+
+	return field.GetStatus();
+}
+
+void HYEvaluator::CheckAssumption(HYField &field, StepStore &sto)
+{
+	int height = field.height, width = field.width;
+
+	for (int i = 0; i < height; ++i) {
+		for (int j = 0; j < width; ++j) {
+			if (field.CellStatus(i, j) != HYField::UNDECIDED) continue;
+
+			HYField f_black = field, f_white = field;
+
+			f_black.DetermineBlack(i, j);
+			SolveArea(f_black, i - 2, j - 2, i + 3, j + 3);
+
+			f_white.DetermineWhite(i, j);
+			SolveArea(f_white, i - 2, j - 2, i + 3, j + 3);
+
+			if ((f_black.GetStatus() & HYField::INCONSISTENT) && (f_white.GetStatus() & HYField::INCONSISTENT)) {
+				f_black.Debug();
+			}
+			if (f_black.GetStatus() & HYField::INCONSISTENT) {
+				sto.push_back(SingleCandidate(field.Id(i, j), 0, 2.0));
+			}
+			if (f_white.GetStatus() & HYField::INCONSISTENT) {
+				sto.push_back(SingleCandidate(field.Id(i, j), 1, 2.0));
+			}
+		}
+	}
+}
+
 double HYEvaluator::Step(HYField &field)
 {
 	// (step weight, (cell, white: 0, black: 1) )
@@ -591,6 +678,7 @@ double HYEvaluator::Step(HYField &field)
 	CheckCellConnectivity(field, cand);
 	CheckThreeRoom(field, cand);
 	CheckAllRoom(field, cand);
+	CheckAssumption(field, cand);
 
 	if (cand.size() == 0) return -1.0;
 
@@ -605,6 +693,7 @@ double HYEvaluator::Step(HYField &field)
 		}
 	}
 
+	int rem_cells = height * width - field.GetProgress();
 	auto& hand_point = cand[lp].second;
 
 	for (auto& pt : hand_point) {
@@ -624,7 +713,7 @@ double HYEvaluator::Step(HYField &field)
 	}
 
 	//ret = (1 / ret) - 1e-7;
-	ret = pow(ret, -(1 / 2.0)) * hand_point.size();
+	ret = pow(ret, -(1 / 2.0)) * hand_point.size() * sqrt(sqrt(rem_cells));
 
 	return ret;
 }

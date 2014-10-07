@@ -48,6 +48,7 @@ HYField::HYField(const HYField &src)
 	conm_ps = HYConnectionManager(height, width, (CellId*)(pool + ((char*)src.conm_ps.GetPointer() - src.pool)));
 	rel_pseudo_con = (bool*)(pool + ((char*)src.rel_pseudo_con - src.pool));
 	aux_cell = src.aux_cell;
+	method = src.method;
 	memcpy(pool, src.pool, sz_pool);
 
 	for (int i = 0; i < height; i++) {
@@ -86,6 +87,7 @@ void HYField::CopyStatus(const HYField &src)
 	conm_ps = HYConnectionManager(height, width, (CellId*)(pool + ((char*)src.conm_ps.GetPointer() - src.pool)));
 	rel_pseudo_con = (bool*)(pool + ((char*)src.rel_pseudo_con - src.pool));
 	aux_cell = src.aux_cell;
+	method = src.method;
 	memcpy(pool, src.pool, sz_pool);
 
 	for (int i = 0; i < height; i++) {
