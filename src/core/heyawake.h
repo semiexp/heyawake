@@ -52,6 +52,24 @@ public:
 	bool CheckValidity(CellCord y, CellCord x);
 };
 
+class HYConnectionTree
+{
+	typedef int CellId;
+
+	std::vector<std::pair<int, int> > *adj;
+	CellId n_cells;
+
+	bool Dfs(CellId s, CellId d, CellId rt, int &sol);
+
+public:
+	HYConnectionTree() { adj = nullptr; }
+	HYConnectionTree(CellId n_cells) : n_cells(n_cells) { adj = new std::vector<std::pair<int, int> >[n_cells]; }
+	~HYConnectionTree() { if (adj) delete[] adj; }
+
+	void AddEdge(CellId s, CellId d, int dist);
+	int Distance(CellId s, CellId d);
+};
+
 struct HYSolverMethod
 {
 	bool adjacent_black;
