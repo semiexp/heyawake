@@ -6,9 +6,9 @@
 #include <cmath>
 #include <memory>
 
-const double HYEvaluator::ADJACENT_BLACK = 1.0;
+const double HYEvaluator::ADJACENT_BLACK = 0.5;
 const double HYEvaluator::CELL_CONNECTIVITY = 1.0;
-const double HYEvaluator::THREE_ROOM = 1.0;
+const double HYEvaluator::THREE_ROOM = 0.6;
 const double HYEvaluator::PSEUDO_CONNECTION = 2.0;
 
 HYEvaluator::StepCand SingleCandidate(int cell, int type, double weight)
@@ -43,12 +43,16 @@ void HYEvaluator::CheckCellConnectivity(HYField &field, StepStore &sto)
 {
 	int height = field.height, width = field.width;
 
+	HYConnectionTree tree(height * width + 1);
+	//field.Debug();
+	field.CreateConnectionTree(tree);
+
 	for (int i = 0; i < height; ++i) {
 		for (int j = 0; j < width; ++j) {
 			// TODO: proper way to estimate 'weight' is the distance in the tree
 
 			if (field.CellStatus(i, j) != HYField::UNDECIDED) continue;
-
+			
 			if (!field.rel_pseudo_con[field.Id(i, j)]) {
 				if (!field.conm.CheckValidity(i, j)) {
 					sto.push_back(SingleCandidate(field.Id(i, j), 0, CELL_CONNECTIVITY));
@@ -58,6 +62,16 @@ void HYEvaluator::CheckCellConnectivity(HYField &field, StepStore &sto)
 			} else if (!field.conm.CheckValidity(i, j)) {
 				sto.push_back(SingleCandidate(field.Id(i, j), 0, CELL_CONNECTIVITY));
 			}
+			
+			/*
+			if (!field.rel_pseudo_con[field.Id(i, j)]) {
+				double cost = pow(field.conm_ps.CheckCost(i, j, tree), 0.5) * CELL_CONNECTIVITY;
+				sto.push_back(SingleCandidate(field.Id(i, j), 0, cost));
+			} else if (!field.conm.CheckValidity(i, j)) {
+				double cost = pow(field.conm.CheckCost(i, j, tree), 0.5) * CELL_CONNECTIVITY;
+				sto.push_back(SingleCandidate(field.Id(i, j), 0, cost));
+			}
+			*/
 		}
 	}
 }
@@ -120,14 +134,16 @@ int HYEvaluator::CheckValidityOfPattern(HYField &field, int top_y, int top_x, in
 	for (int i = 0; i < ys.size(); ++i) {
 		bool aux_flg = false;
 
-		for (int j = 0; j < 4; ++j) {
-			int y2 = ys[i] + HYField::dy[j] + HYField::dy[(j + 1) % 4], x2 = xs[i] + HYField::dx[j] + HYField::dx[(j + 1) % 4];
-			int bid = field.BlackUnitId(y2, x2); if (bid == -1) continue;
-			bid = mode ? field.PseudoRoot(bid) : field.Root(bid);
+		if (field.CellStatus(ys[i], xs[i]) != HYField::BLACK) {
+			for (int j = 0; j < 4; ++j) {
+				int y2 = ys[i] + HYField::dy[j] + HYField::dy[(j + 1) % 4], x2 = xs[i] + HYField::dx[j] + HYField::dx[(j + 1) % 4];
+				int bid = field.BlackUnitId(y2, x2); if (bid == -1) continue;
+				bid = mode ? field.PseudoRoot(bid) : field.Root(bid);
 
-			if (field.Range(y2, x2) && top_y <= y2 && y2 < end_y && top_x <= x2 && x2 < end_x) continue;
-			if (bid == r_aux) aux_flg = true;
-			else adjs.push_back(bid);
+				if (field.Range(y2, x2) && top_y <= y2 && y2 < end_y && top_x <= x2 && x2 < end_x) continue;
+				if (bid == r_aux) aux_flg = true;
+				else adjs.push_back(bid);
+			}
 		}
 
 		if (aux_flg) ++aux_cnt;
@@ -241,7 +257,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 			}
 		}
 
-		if(cands.size() > 0) sto.push_back(std::make_pair(1.0 * cands.size() + ofs, cands));
+		if(cands.size() > 0) sto.push_back(std::make_pair(0.5 * cands.size() + ofs, cands));
 
 		return;
 	}
@@ -257,7 +273,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 			}
 		}
 
-		if(cands.size() > 0) sto.push_back(std::make_pair(1.0 * cands.size() + ofs, cands));
+		if(cands.size() > 0) sto.push_back(std::make_pair(0.5 * cands.size() + ofs, cands));
 
 		return;
 	}
@@ -445,7 +461,7 @@ void HYEvaluator::ShrinkRoom(HYField &field, StepStore &sto, int room_id)
 		}
 	}
 
-	CheckVirtualRoom(field, sto, top_y, top_x, end_y, end_x, rem_hint, (rem_hint == room.hint ? 0.5 : 0.6));
+	CheckVirtualRoom(field, sto, top_y, top_x, end_y, end_x, rem_hint, 0.1); // (rem_hint == room.hint ? 0.5 : 0.6));
 }
 
 void HYEvaluator::SeparateRoom(HYField &field, StepStore &sto, int room_id)
@@ -658,11 +674,28 @@ void HYEvaluator::CheckAssumption(HYField &field, StepStore &sto)
 				f_black.Debug();
 			}
 			if (f_black.GetStatus() & HYField::INCONSISTENT) {
-				sto.push_back(SingleCandidate(field.Id(i, j), 0, 2.0));
+				sto.push_back(SingleCandidate(field.Id(i, j), 0, 5.0));
 			}
 			if (f_white.GetStatus() & HYField::INCONSISTENT) {
-				sto.push_back(SingleCandidate(field.Id(i, j), 1, 2.0));
+				sto.push_back(SingleCandidate(field.Id(i, j), 1, 5.0));
 			}
+
+			/*
+			if (!(f_white.GetStatus() & HYField::INCONSISTENT) && !(f_black.GetStatus() & HYField::INCONSISTENT)) {
+				// insanity
+				f_black.SetSolverMethod(HYSolverMethod());
+				f_white.SetSolverMethod(HYSolverMethod());
+				HYSolver::Solve(f_black);
+				HYSolver::Solve(f_white);
+
+				if (f_black.GetStatus() & HYField::INCONSISTENT) {
+					sto.push_back(SingleCandidate(field.Id(i, j), 0, 7.0));
+				}
+				if (f_white.GetStatus() & HYField::INCONSISTENT) {
+					sto.push_back(SingleCandidate(field.Id(i, j), 1, 7.0));
+				}
+			}
+			*/
 		}
 	}
 }
@@ -712,8 +745,7 @@ double HYEvaluator::Step(HYField &field)
 		ret += pow(cand_cost, -2.0);
 	}
 
-	//ret = (1 / ret) - 1e-7;
-	ret = pow(ret, -(1 / 2.0)) * hand_point.size() * sqrt(sqrt(rem_cells));
+	ret = pow(ret, -(1 / 2.0)) * hand_point.size() * pow(rem_cells, 0.5);
 
 	return ret;
 }
@@ -735,8 +767,8 @@ double HYEvaluator::Evaluate(HYProblem &prob)
 		ret += st;
 	}
 
-	if (field.GetStatus() == HYField::SOLVED) return ret;
-	printf("%d / %f\n", field.GetStatus(), ret);
-	field.Debug();
+	if (field.GetStatus() == HYField::SOLVED) return ret / (field.height * field.width) * 100;
+	//printf("%d / %f\n", field.GetStatus(), ret);
+	//field.Debug();
 	return -1;
 }

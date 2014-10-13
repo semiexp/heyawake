@@ -28,6 +28,24 @@ public:
 	}
 };
 
+class HYConnectionTree
+{
+	typedef int CellId;
+
+	std::vector<std::pair<int, int> > *adj;
+	CellId n_cells;
+
+	bool Dfs(CellId s, CellId d, CellId rt, int &sol);
+
+public:
+	HYConnectionTree() { adj = nullptr; }
+	HYConnectionTree(CellId n_cells) : n_cells(n_cells) { adj = new std::vector<std::pair<int, int> >[n_cells]; }
+	~HYConnectionTree() { if (adj) delete[] adj; }
+
+	void AddEdge(CellId s, CellId d, int dist);
+	int Distance(CellId s, CellId d);
+};
+
 class HYConnectionManager
 {
 	typedef int CellCord;
@@ -50,24 +68,7 @@ public:
 	CellId Root(CellId p) { return unit_root[p] < 0 ? p : (unit_root[p] = Root(unit_root[p])); }
 	void Join(CellId p, CellId q);
 	bool CheckValidity(CellCord y, CellCord x);
-};
-
-class HYConnectionTree
-{
-	typedef int CellId;
-
-	std::vector<std::pair<int, int> > *adj;
-	CellId n_cells;
-
-	bool Dfs(CellId s, CellId d, CellId rt, int &sol);
-
-public:
-	HYConnectionTree() { adj = nullptr; }
-	HYConnectionTree(CellId n_cells) : n_cells(n_cells) { adj = new std::vector<std::pair<int, int> >[n_cells]; }
-	~HYConnectionTree() { if (adj) delete[] adj; }
-
-	void AddEdge(CellId s, CellId d, int dist);
-	int Distance(CellId s, CellId d);
+	int CheckCost(CellCord y, CellCord x, HYConnectionTree &tree);
 };
 
 struct HYSolverMethod
@@ -184,6 +185,8 @@ class HYField
 	Status SolveVirtualRoomWithDatabase(int top_y, int top_x, int end_y, int end_x, int hint);
 	Status SolveVirtualRoom(int top_y, int top_x, int end_y, int end_x, int hint);
 	Status SolveTrivialRoom(RoomId rid);
+
+	void CreateConnectionTree(HYConnectionTree &tree);
 
 	friend class HYSolver;
 	friend class HYConnectionManager;
