@@ -285,6 +285,6 @@ public:
 	static int SolveArea(HYField &field, int top_y, int top_x, int end_y, int end_x);
 	static void CheckAssumption(HYField &field, StepStore &sto);
 
-	static double Step(HYField &field);
+	static double Step(HYField &field, std::vector<std::pair<int, int> > &last);
 	static double Evaluate(HYProblem &prob);
 };
