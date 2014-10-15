@@ -95,7 +95,7 @@ void ConsecutiveEvaluator(int argc, char* argv[])
 		th.join();
 	}
 
-	for (int i = 0; i < ids.size(); ++i) {
+	for (int i = ids.size() - 1; i >= 0; --i) {
 		std::cout << ids[i] << " " << difficulty[i] << std::endl;
 	}
 }
