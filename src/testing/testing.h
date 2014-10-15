@@ -10,3 +10,5 @@ void PseudoConnectionTest();
 void ConsecutiveSolver();
 
 void EvaluateTest(int pid);
+
+void ConsecutiveEvaluator(int argc, char* argv[]);

@@ -11,7 +11,8 @@ int main(int argc, char* argv[])
 	//ConsecutiveSolver();
 	//BruteTest(-1);
 	//for(int i = 0; i <= 7; ++i) EvaluateTest(i);
-	EvaluateTest(-1);
+	//EvaluateTest(-1);
+	ConsecutiveEvaluator(argc, argv);
 
 	return 0;
 }
