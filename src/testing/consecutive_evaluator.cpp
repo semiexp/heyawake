@@ -67,7 +67,7 @@ void ConsecutiveEvaluator(int argc, char* argv[])
 	int sid = atoi(argv[2]), eid = atoi(argv[3]);
 
 	probs.clear();
-	for (int i = sid; i <= eid; ++i) {
+	for (int i = eid; i >= sid; --i) {
 		std::string fn = bas_loc;
 		std::string id;
 		id.push_back(i / 100 + '0');
