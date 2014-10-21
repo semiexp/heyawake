@@ -50,6 +50,23 @@ void EvaluateWorker()
 	}
 }
 
+double CorRel(std::vector<double> &x, std::vector<double> &y)
+{
+	double ax = 0, ay = 0;
+	for (double v : x) ax += v;
+	for (double v : y) ay += v;
+	ax /= x.size(); ay /= x.size();
+
+	double cov = 0;
+	for (int i = 0; i < x.size(); ++i) cov += (x[i] - ax) * (y[i] - ay);
+	
+	double std_x = 0, std_y = 0;
+	for (double v : x) std_x += (v - ax) * (v - ax);
+	for (double v : y) std_y += (v - ay) * (v - ay);
+
+	return cov / sqrt(std_x * std_y);
+}
+
 void ConsecutiveEvaluator(int argc, char* argv[])
 {
 	/*
@@ -98,4 +115,17 @@ void ConsecutiveEvaluator(int argc, char* argv[])
 	for (int i = ids.size() - 1; i >= 0; --i) {
 		std::cout << ids[i] << " " << difficulty[i] << std::endl;
 	}
+
+	std::vector<double> x, y;
+	for (int i = 0; i < ids.size(); ++i) if (difficulty[i] >= 0) {
+		y.push_back(difficulty[i]);
+		double pid = 0;
+		for (auto c : ids[i]) {
+			pid *= 10;
+			pid += c - '0';
+		}
+		x.push_back(pid);
+	}
+
+	std::cerr << "Correlation coefficient: " << CorRel(x, y) << std::endl;
 }
