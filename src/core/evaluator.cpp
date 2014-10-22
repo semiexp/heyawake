@@ -7,8 +7,8 @@
 #include <memory>
 
 const double HYEvaluator::ADJACENT_BLACK = 0.1;
-const double HYEvaluator::CELL_CONNECTIVITY = 0.7;
-const double HYEvaluator::THREE_ROOM = 0.6;
+const double HYEvaluator::CELL_CONNECTIVITY = 0.6;
+const double HYEvaluator::THREE_ROOM = 0.5;
 const double HYEvaluator::PSEUDO_CONNECTION = 2.0;
 
 HYEvaluator::StepCand SingleCandidate(int cell, int type, double weight)
@@ -52,7 +52,7 @@ void HYEvaluator::CheckCellConnectivity(HYField &field, StepStore &sto)
 			// TODO: proper way to estimate 'weight' is the distance in the tree
 
 			if (field.CellStatus(i, j) != HYField::UNDECIDED) continue;
-			
+			/*
 			if (!field.rel_pseudo_con[field.Id(i, j)]) {
 				if (!field.conm.CheckValidity(i, j)) {
 					sto.push_back(SingleCandidate(field.Id(i, j), 0, CELL_CONNECTIVITY));
@@ -62,8 +62,8 @@ void HYEvaluator::CheckCellConnectivity(HYField &field, StepStore &sto)
 			} else if (!field.conm.CheckValidity(i, j)) {
 				sto.push_back(SingleCandidate(field.Id(i, j), 0, CELL_CONNECTIVITY));
 			}
+			*/
 			
-			/*
 			if (!field.rel_pseudo_con[field.Id(i, j)] && !field.conm_ps.CheckValidity(i, j)) {
 				double cost = pow(field.conm_ps.CheckCost(i, j, tree), 0.2) * CELL_CONNECTIVITY;
 				sto.push_back(SingleCandidate(field.Id(i, j), 0, cost));
@@ -71,7 +71,7 @@ void HYEvaluator::CheckCellConnectivity(HYField &field, StepStore &sto)
 				double cost = pow(field.conm.CheckCost(i, j, tree), 0.2) * CELL_CONNECTIVITY;
 				sto.push_back(SingleCandidate(field.Id(i, j), 0, cost));
 			}
-			*/
+			
 		}
 	}
 }
@@ -273,7 +273,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 			}
 		}
 
-		if (cands.size() > 0) sto.push_back(std::make_pair(0.5 * cands.size() + ofs, cands));
+		if (cands.size() > 0) sto.push_back(std::make_pair(1.0 * cands.size() + ofs, cands));
 
 		return;
 	}
@@ -328,7 +328,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 				}
 			}
 
-			if (cands.size() > 0) sto.push_back(std::make_pair(1.2 * cands.size() + ofs, cands));
+			if (cands.size() > 0) sto.push_back(std::make_pair(1.4 * cands.size() + ofs, cands));
 
 			return;
 		}
@@ -343,7 +343,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 			}
 		}
 
-		if (cands.size() > 0) sto.push_back(std::make_pair(0.8 * cands.size() + ofs, cands));
+		if (cands.size() > 0) sto.push_back(std::make_pair(0.9 * cands.size() + ofs, cands));
 
 		return;
 	}
@@ -357,7 +357,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 			}
 		}
 
-		if (cands.size() > 0) sto.push_back(std::make_pair(0.8 * cands.size() + ofs, cands));
+		if (cands.size() > 0) sto.push_back(std::make_pair(0.9 * cands.size() + ofs, cands));
 
 		return;
 	}
@@ -400,7 +400,7 @@ void HYEvaluator::CheckVirtualRoom(HYField &field, StepStore &sto, int top_y, in
 		}
 		int cause = st1 + st2 - PATTERN_VALID;
 		double difficulty = 
-			(cause == PATTERN_VALID || cause == PATTERN_OCCUPIED) ? 1.0 : (cause == PATTERN_DISJOINT ? 1.2 : 2.2);
+			(cause == PATTERN_VALID || cause == PATTERN_OCCUPIED) ? 1.1 : (cause == PATTERN_DISJOINT ? 1.1 : 2.2);
 
 		if (room_h == 2 && hint == room_w) {
 			for (int i = 0; i < room_w; ++i) {
@@ -574,7 +574,7 @@ void HYEvaluator::SeparateRoom(HYField &field, StepStore &sto, int room_id)
 
 	if (tot == hint) {
 		for (int i = 0; i < top_ys.size(); ++i) {
-			CheckVirtualRoom(field, sto, top_ys[i], top_xs[i], end_ys[i], end_xs[i], m_blacks[i], 0.5);
+			CheckVirtualRoom(field, sto, top_ys[i], top_xs[i], end_ys[i], end_xs[i], m_blacks[i], 0.3);
 		}
 	}
 }
@@ -685,11 +685,11 @@ void HYEvaluator::CheckAssumption(HYField &field, StepStore &sto)
 					f_black.Debug();
 				}
 				if (f_black.GetStatus() & HYField::INCONSISTENT) {
-					sto.push_back(SingleCandidate(field.Id(i, j), 0, 2.0 * sqrt(k * s_black)));
+					sto.push_back(SingleCandidate(field.Id(i, j), 0, 1.8 * sqrt(k * s_black)));
 					break;
 				}
 				if (f_white.GetStatus() & HYField::INCONSISTENT) {
-					sto.push_back(SingleCandidate(field.Id(i, j), 1, 2.0 * sqrt(k * s_white)));
+					sto.push_back(SingleCandidate(field.Id(i, j), 1, 1.8 * sqrt(k * s_white)));
 					break;
 				}
 			}
@@ -729,32 +729,32 @@ double HYEvaluator::Step(HYField &field, std::vector<std::pair<int, int> > &last
 	CheckAssumption(field, cand);
 
 	if (cand.size() == 0) return -1.0;
-
+	/*
 	if (last.size() > 0) {
 		for (int i = 0; i < cand.size(); ++i) {
 			double aux_score = cand[i].first;
 
 			for (auto loc : cand[i].second) {
 				int y = loc.first / width, x = loc.first % width;
-				double s = 0;
+				double s = 10;
 
 				for (auto lp : last) {
 					int yl = lp.first / width, xl = lp.first % width;
 					int m = (y > yl ? (y - yl) : (yl - y)) + (x > xl ? (x - xl) : (xl - x));
-
+					s = std::min(s, m + 0.0);
 					//if (m == 0) fprintf(stderr, "%d %d %d %d\n", y, x, yl, xl);
-					s += pow(m, 0.5);
+					//s += m;// pow(m, 0.5);
 				}
 
-				s /= last.size();
+				//s /= last.size();
 
-				aux_score += s * 0.02;
+				aux_score += s * 0.01;
 			}
 
 			cand[i].first = aux_score;
 		}
 	}
-
+	*/
 	double lval = cand[0].first / cand[0].second.size(); int lp = 0;
 
 	for (int i = 1; i < cand.size(); ++i) {
@@ -785,10 +785,10 @@ double HYEvaluator::Step(HYField &field, std::vector<std::pair<int, int> > &last
 		double cand_cost = c.first / c.second.size();
 
 		// ret += 1 / (cand_cost + 1e-7);
-		ret += pow(cand_cost, -2.0);
+		ret += pow(cand_cost, -1.0);
 	}
 
-	ret = pow(ret, -(1 / 2.0)) * hand_point.size(); // *pow(rem_cells, 0.2);
+	ret = pow(ret, -(1 / 1.0)) * hand_point.size(); //*pow(rem_cells, 0.2);
 	//printf("%dcells (%d) %f pts (%f pts each)\n", hand_point.size(), hand_point[0].first, ret, ret / hand_point.size());
 	return ret;
 }
@@ -812,7 +812,7 @@ double HYEvaluator::Evaluate(HYProblem &prob)
 		ret += st;
 	}
 
-	if (field.GetStatus() == HYField::SOLVED) return ret / pow(field.height * field.width, 0.6) * 20;
+	if (field.GetStatus() == HYField::SOLVED) return ret / pow(field.height * field.width, 0.6) * 150;
 	// printf("%d / %f\n", field.GetStatus(), ret);
 	// field.Debug();
 	return -1;

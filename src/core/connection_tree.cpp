@@ -57,13 +57,13 @@ void HYField::CreateConnectionTree(HYConnectionTree &tree)
 		for (int j = 0; j < width; ++j) {
 			if (1 <= i && i < height - 1 && IsBlackOrOutOfRange(i, j - 1) && IsBlackOrOutOfRange(i, j + 1)) {
 				if (CellRoomId(i, j) != CellRoomId(i - 1, j) && CellRoomId(i, j) != CellRoomId(i + 1, j) && CellStatus(i - 1, j) != BLACK && CellStatus(i + 1, j) != BLACK) {
-					tree.AddEdge(BlackUnitId(i, j - 1), BlackUnitId(i, j + 1), 40);
+					tree.AddEdge(BlackUnitId(i, j - 1), BlackUnitId(i, j + 1), 10);
 				}
 			}
 
 			if (1 <= j && j < width - 1 && IsBlackOrOutOfRange(i - 1, j) && IsBlackOrOutOfRange(i + 1, j)) {
 				if (CellRoomId(i, j) != CellRoomId(i, j - 1) && CellRoomId(i, j) != CellRoomId(i, j + 1) && CellStatus(i, j - 1) != BLACK && CellStatus(i, j + 1) != BLACK) {
-					tree.AddEdge(BlackUnitId(i - 1, j), BlackUnitId(i + 1, j), 40);
+					tree.AddEdge(BlackUnitId(i - 1, j), BlackUnitId(i + 1, j), 10);
 				}
 			}
 		}
