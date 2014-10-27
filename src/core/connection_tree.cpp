@@ -47,7 +47,9 @@ void HYField::CreateConnectionTree(HYConnectionTree &tree)
 
 			for (int k = 0; k < 4; ++k) {
 				int y2 = i + dy[k] + dy[(k + 1) % 4], x2 = j + dx[k] + dx[(k + 1) % 4];
-				if (Range(y2, x2) && CellStatus(y2, x2) == BLACK) tree.AddEdge(Id(i, j), Id(y2, x2), 1);
+				if (Range(y2, x2) && CellStatus(y2, x2) == BLACK) {
+					if(Id(i, j) < Id(y2, x2)) tree.AddEdge(Id(i, j), Id(y2, x2), 1);
+				}
 			}
 		}
 	}
